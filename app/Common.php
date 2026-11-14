@@ -75,3 +75,25 @@ if (! class_exists('NumberFormatter', false)) {
     }
 }
 
+if (! function_exists('intl_is_failure')) {
+    function intl_is_failure(int $errorCode): bool
+    {
+        return $errorCode > 0;
+    }
+}
+
+if (! function_exists('intl_get_error_code')) {
+    function intl_get_error_code(): int
+    {
+        return 0;
+    }
+}
+
+if (! function_exists('intl_get_error_message')) {
+    function intl_get_error_message(): string
+    {
+        return 'U_ZERO_ERROR';
+    }
+}
+
+
