@@ -44,7 +44,30 @@ Dibangun menggunakan **CodeIgniter 4 (PHP 8.2+)**, **MySQL/MariaDB**, dan antarm
 
 ---
 
-## 🚀 Panduan Instalasi Lokal
+## ⚡ Cara Menjalankan di GitHub Codespaces (Untuk Orang Lain / Tim)
+
+Jika orang lain (dosen, penguji, atau anggota tim) ingin menjalankan proyek ini langsung dari browser via **GitHub Codespaces**, mereka cukup melakukan 2 langkah berikut:
+
+### 1. Buat Codespaces Baru
+1. Buka repositori ini di GitHub.
+2. Klik tombol hijau **`<> Code`** -> pilih tab **`Codespaces`** -> klik **`Create codespace on main`**.
+
+### 2. Jalankan Perintah Otomatis
+Setelah terminal Codespaces terbuka di browser, jalankan satu perintah ini:
+```bash
+bash setup.sh
+```
+*Script ini otomatis menginstal dependensi, membuat database MariaDB, menjalankan migrasi & seeder, dan menyalakan server.*
+
+### 3. Buka Website
+- Klik pop-up **"Open in Browser"** yang muncul di pojok kanan bawah, atau
+- Buka tab **`PORTS`** di panel bawah -> klik ikon **Bola Dunia 🌐** pada port `8085`.
+
+*(Untuk menjalankan ulang di kemudian hari setelah setup pertama, cukup ketik: `bash start.sh`)*
+
+---
+
+## 🚀 Panduan Instalasi Lokal (XAMPP / Laragon)
 
 ### 1. Clone Repository
 ```bash
