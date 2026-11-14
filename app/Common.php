@@ -62,6 +62,16 @@ if (! class_exists('NumberFormatter', false)) {
         {
             return true;
         }
+
+        public function setPattern(string $pattern): bool
+        {
+            return true;
+        }
+
+        public function __call(string $name, array $arguments)
+        {
+            return null;
+        }
     }
 }
 
