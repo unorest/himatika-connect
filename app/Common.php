@@ -13,3 +13,15 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+// Polyfill for Locale class when ext-intl is missing in minimal environments (e.g. GitHub Codespaces)
+if (! class_exists('Locale', false)) {
+    class Locale
+    {
+        public static function getDefault(): string
+        {
+            return 'id_ID';
+        }
+    }
+}
+
