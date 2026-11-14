@@ -96,4 +96,31 @@ if (! function_exists('intl_get_error_message')) {
     }
 }
 
+// Ensure site_url() and base_url() return clean root-relative paths
+// This prevents cross-domain navigation / localhost redirection issues in GitHub Codespaces and proxy environments
+if (! function_exists('site_url')) {
+    function site_url($relativePath = '', ?string $scheme = null, ?\Config\App $config = null): string
+    {
+        $path = is_array($relativePath) ? implode('/', $relativePath) : (string) $relativePath;
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+        $trimmed = ltrim($path, '/');
+        return $trimmed === '' ? '/' : '/' . $trimmed;
+    }
+}
+
+if (! function_exists('base_url')) {
+    function base_url($relativePath = '', ?string $scheme = null): string
+    {
+        $path = is_array($relativePath) ? implode('/', $relativePath) : (string) $relativePath;
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+        $trimmed = ltrim($path, '/');
+        return $trimmed === '' ? '/' : '/' . $trimmed;
+    }
+}
+
+
 
