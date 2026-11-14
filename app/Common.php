@@ -14,7 +14,7 @@
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
 
-// Polyfill for Locale class when ext-intl is missing in minimal environments (e.g. GitHub Codespaces)
+// Polyfill for Locale & NumberFormatter when ext-intl is missing in minimal environments
 if (! class_exists('Locale', false)) {
     class Locale
     {
@@ -34,6 +34,33 @@ if (! class_exists('Locale', false)) {
         public static function __callStatic(string $name, array $arguments)
         {
             return null;
+        }
+    }
+}
+
+if (! class_exists('NumberFormatter', false)) {
+    class NumberFormatter
+    {
+        public const DECIMAL = 1;
+        public const CURRENCY = 2;
+        public const PERCENT = 3;
+        public const SCIENTIFIC = 4;
+        public const SPELLOUT = 5;
+        public const ORDINAL = 6;
+        public const DURATION = 7;
+        public const PATTERN_RULEBASED = 9;
+        public const DEFAULT_STYLE = 1;
+
+        public function __construct(string $locale, int $style, ?string $pattern = null) {}
+
+        public function format($value, int $type = 0)
+        {
+            return is_numeric($value) ? number_format((float) $value, 2, ',', '.') : (string) $value;
+        }
+
+        public function setAttribute(int $attribute, $value): bool
+        {
+            return true;
         }
     }
 }
