@@ -18,9 +18,22 @@
 if (! class_exists('Locale', false)) {
     class Locale
     {
+        protected static string $default = 'id_ID';
+
         public static function getDefault(): string
         {
-            return 'id_ID';
+            return static::$default;
+        }
+
+        public static function setDefault(string $locale): bool
+        {
+            static::$default = $locale;
+            return true;
+        }
+
+        public static function __callStatic(string $name, array $arguments)
+        {
+            return null;
         }
     }
 }
