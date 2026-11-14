@@ -42,6 +42,26 @@ class App extends BaseConfig
      */
     public string $indexPage = '';
 
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Auto-detect dynamic baseURL for GitHub Codespaces / dynamic host
+        if (isset($_SERVER['HTTP_HOST'])) {
+            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+                ? 'https'
+                : 'http';
+
+            $this->baseURL = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/';
+
+            $host = explode(':', $_SERVER['HTTP_HOST'])[0];
+            if (! in_array($host, $this->allowedHostnames, true)) {
+                $this->allowedHostnames[] = $host;
+            }
+        }
+    }
+
     /**
      * --------------------------------------------------------------------------
      * URI PROTOCOL
