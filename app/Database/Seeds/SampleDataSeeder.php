@@ -28,6 +28,17 @@ class SampleDataSeeder extends Seeder
             $divMap[$d['slug']] = $d['id'];
         }
 
+        $this->db->disableForeignKeyChecks();
+        $this->db->table('hmt_posts')->truncate();
+        $this->db->table('hmt_events')->truncate();
+        $this->db->table('hmt_forum_answers')->truncate();
+        $this->db->table('hmt_forum_upvotes')->truncate();
+        $this->db->table('hmt_forum_questions')->truncate();
+        $this->db->table('hmt_task_progress_logs')->truncate();
+        $this->db->table('hmt_tasks')->truncate();
+        $this->db->table('hmt_work_programs')->truncate();
+        $this->db->enableForeignKeyChecks();
+
         // 1. Sample Posts (Blog)
         $posts = [
             [

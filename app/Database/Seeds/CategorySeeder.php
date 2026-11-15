@@ -117,7 +117,10 @@ class CategorySeeder extends Seeder
             ],
         ];
 
+        $this->db->disableForeignKeyChecks();
+        $this->db->table('hmt_categories')->truncate();
         $this->db->table('hmt_categories')->insertBatch($categories);
+        $this->db->enableForeignKeyChecks();
         echo "✅ CategorySeeder: " . count($categories) . " kategori berhasil ditambahkan.\n";
     }
 }

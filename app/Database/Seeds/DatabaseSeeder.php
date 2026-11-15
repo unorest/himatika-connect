@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call('CategorySeeder');
         $this->call('UserSeeder');
         $this->call('SampleDataSeeder');
+        $this->call('ScheduleSeeder');
 
         echo "\n🎉 Semua Seeder Berhasil Dijalankan!\n";
     }

@@ -20,6 +20,11 @@ class ScheduleSeeder extends Seeder
             $divMap[$d['slug']] = $d['id'];
         }
 
+        $this->db->disableForeignKeyChecks();
+        $this->db->table('hmt_schedule_attendees')->truncate();
+        $this->db->table('hmt_schedules')->truncate();
+        $this->db->enableForeignKeyChecks();
+
         $schedules = [
             [
                 'title'          => 'Rapat Pleno Bulanan Evaluasi Kinerja Tengah Periode',
