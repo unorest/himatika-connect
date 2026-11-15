@@ -12,88 +12,52 @@ class DivisionSeeder extends Seeder
 
         $divisions = [
             [
-                'name'        => 'Badan Pengurus Harian',
-                'slug'        => 'bph',
-                'description' => 'Badan Pengurus Harian HIMATIKA yang bertanggung jawab atas koordinasi dan pengambilan keputusan organisasi.',
-                'color'       => '#1D4ED8',
-                'icon'        => 'shield-check',
+                'name'        => 'Divisi Stupport',
+                'slug'        => 'stupport',
+                'description' => 'Bertanggung jawab atas operasional, sarana prasarana, logistik perlengkapan, serta dukungan teknis kesekretariatan himpunan.',
+                'color'       => '#10B981',
+                'icon'        => 'life-ring',
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
             [
-                'name'        => 'Divisi Akademik',
-                'slug'        => 'akademik',
-                'description' => 'Bertanggung jawab atas program kerja yang berkaitan dengan kegiatan akademik, tutoring, dan pengembangan intelektual anggota.',
-                'color'       => '#059669',
-                'icon'        => 'academic-cap',
+                'name'        => 'Divisi PDD',
+                'slug'        => 'pdd',
+                'description' => 'Publikasi, Dekorasi, & Dokumentasi — mengelola media sosial, branding visual, liputan dokumentasi kegiatan, dan dekorasi acara.',
+                'color'       => '#F59E0B',
+                'icon'        => 'camera-retro',
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
             [
-                'name'        => 'Divisi Humas & Komunikasi',
-                'slug'        => 'humas',
-                'description' => 'Mengelola hubungan masyarakat, komunikasi eksternal, media sosial, dan publikasi kegiatan himpunan.',
-                'color'       => '#D97706',
-                'icon'        => 'megaphone',
+                'name'        => 'Divisi PDSM',
+                'slug'        => 'pdsm',
+                'description' => 'Pengembangan Daya Saing Mahasiswa — bertanggung jawab atas kaderisasi, pelatihan kepemimpinan, dan peningkatan prestasi akademik anggota.',
+                'color'       => '#8B5CF6',
+                'icon'        => 'users-gear',
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
             [
-                'name'        => 'Divisi Advokasi & Kesejahteraan',
-                'slug'        => 'advokasi',
-                'description' => 'Menampung dan menindaklanjuti aspirasi mahasiswa, serta memastikan kesejahteraan anggota himpunan.',
-                'color'       => '#DC2626',
-                'icon'        => 'hand-raised',
-                'is_active'   => 1,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ],
-            [
-                'name'        => 'Divisi PSDM',
-                'slug'        => 'psdm',
-                'description' => 'Pengembangan Sumber Daya Mahasiswa — bertanggung jawab atas kaderisasi, pelatihan, dan pengembangan karakter anggota.',
-                'color'       => '#7C3AED',
-                'icon'        => 'users',
-                'is_active'   => 1,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ],
-            [
-                'name'        => 'Divisi Kewirausahaan',
-                'slug'        => 'kewirausahaan',
-                'description' => 'Mengelola kegiatan kewirausahaan, usaha himpunan, dan pengembangan jiwa entrepreneurship anggota.',
-                'color'       => '#EA580C',
-                'icon'        => 'currency-dollar',
-                'is_active'   => 1,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ],
-            [
-                'name'        => 'Divisi Teknologi & Inovasi',
-                'slug'        => 'teknologi',
-                'description' => 'Mengembangkan proyek teknologi, kompetisi programming, dan inovasi berbasis teknologi informasi.',
-                'color'       => '#0891B2',
-                'icon'        => 'computer-desktop',
-                'is_active'   => 1,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ],
-            [
-                'name'        => 'Divisi Pengabdian Masyarakat',
-                'slug'        => 'pengabdian',
-                'description' => 'Merancang dan menjalankan program pengabdian kepada masyarakat sebagai bentuk kontribusi sosial himpunan.',
-                'color'       => '#16A34A',
-                'icon'        => 'heart',
+                'name'        => 'Divisi Intellogy',
+                'slug'        => 'intellogy',
+                'description' => 'Intelligence & Technology — mengawal inovasi riset teknologi informasi, pengembangan perangkat lunak, dan kompetisi saintifik.',
+                'color'       => '#06B6D4',
+                'icon'        => 'microchip',
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
         ];
 
+        $this->db->disableForeignKeyChecks();
+        $this->db->table('hmt_divisions')->truncate();
         $this->db->table('hmt_divisions')->insertBatch($divisions);
-        echo "✅ DivisionSeeder: " . count($divisions) . " divisi berhasil ditambahkan.\n";
+        $this->db->enableForeignKeyChecks();
+
+        echo "✅ DivisionSeeder: 4 divisi resmi (Stupport, PDD, PDSM, Intellogy) berhasil ditambahkan.\n";
     }
 }

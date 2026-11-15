@@ -11,8 +11,8 @@ class ScheduleSeeder extends Seeder
         $now = date('Y-m-d H:i:s');
 
         $admin = $this->db->table('hmt_users')->where('email', 'admin@himatika.org')->get()->getRowArray();
-        $tekno = $this->db->table('hmt_users')->where('email', 'teknologi@himatika.org')->get()->getRowArray();
-        $advok = $this->db->table('hmt_users')->where('email', 'advokasi@himatika.org')->get()->getRowArray();
+        $tekno = $this->db->table('hmt_users')->where('email', 'intellogy@himatika.org')->get()->getRowArray();
+        $advok = $this->db->table('hmt_users')->where('email', 'stupport@himatika.org')->get()->getRowArray();
 
         $divisions = $this->db->table('hmt_divisions')->get()->getResultArray();
         $divMap = [];
@@ -37,7 +37,7 @@ class ScheduleSeeder extends Seeder
             [
                 'title'          => 'Rapat Koordinasi Teknis Proker HIMATIKA Hub & Hackfest',
                 'description'    => 'Sinkronisasi progress deployment server dan modul form pendaftaran peserta lomba hackathon.',
-                'division_id'    => $divMap['teknologi'] ?? 7,
+                'division_id'    => $divMap['intellogy'] ?? null,
                 'start_datetime' => date('Y-m-d 13:30:00', strtotime('+4 days')),
                 'end_datetime'   => date('Y-m-d 15:30:00', strtotime('+4 days')),
                 'location'       => 'Lab Komputer 2',
@@ -50,7 +50,7 @@ class ScheduleSeeder extends Seeder
             [
                 'title'          => 'Batas Waktu (Deadline) Pengumpulan Draft LPJ Triwulan 1',
                 'description'    => 'Seluruh bendahara divisi wajib mengumpulkan rekapitulasi nota dan laporan pertanggungjawaban fisik ke Bendahara Umum.',
-                'division_id'    => $divMap['bph'] ?? 1,
+                'division_id'    => $divMap['stupport'] ?? null,
                 'start_datetime' => date('Y-m-d 23:59:59', strtotime('+7 days')),
                 'end_datetime'   => date('Y-m-d 23:59:59', strtotime('+7 days')),
                 'location'       => 'Google Drive Sekretariat BPH',

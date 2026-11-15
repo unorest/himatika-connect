@@ -12,9 +12,9 @@ class SampleDataSeeder extends Seeder
 
         // Ambil User & Category IDs
         $admin = $this->db->table('hmt_users')->where('email', 'admin@himatika.org')->get()->getRowArray();
-        $advokasiUser = $this->db->table('hmt_users')->where('email', 'advokasi@himatika.org')->get()->getRowArray();
-        $humasUser = $this->db->table('hmt_users')->where('email', 'humas@himatika.org')->get()->getRowArray();
-        $teknoUser = $this->db->table('hmt_users')->where('email', 'teknologi@himatika.org')->get()->getRowArray();
+        $stupportUser = $this->db->table('hmt_users')->where('email', 'stupport@himatika.org')->get()->getRowArray();
+        $pddUser = $this->db->table('hmt_users')->where('email', 'pdd@himatika.org')->get()->getRowArray();
+        $intellogyUser = $this->db->table('hmt_users')->where('email', 'intellogy@himatika.org')->get()->getRowArray();
 
         $categories = $this->db->table('hmt_categories')->get()->getResultArray();
         $catMap = [];
@@ -36,7 +36,7 @@ class SampleDataSeeder extends Seeder
                 'body'         => '<p>Selamat datang di kepengurusan baru HIMATIKA Connect! Melalui pelantikan ini, segenap pengurus berkomitmen menghadirkan transformasi digital, transparansi aspirasi, dan peningkatan kualitas akademik seluruh mahasiswa Informatika.</p><p>Mari berkolaborasi bersama membangun himpunan yang inklusif dan progresif.</p>',
                 'excerpt'      => 'Pelantikan resmi pengurus baru HIMATIKA Connect dengan semangat sinergi dan inovasi digital.',
                 'thumbnail'    => null,
-                'author_id'    => $humasUser['id'] ?? $admin['id'],
+                'author_id'    => $pddUser['id'] ?? $admin['id'],
                 'category_id'  => $catMap['kegiatan-event'] ?? null,
                 'status'       => 'published',
                 'read_time'    => 3,
@@ -73,13 +73,13 @@ class SampleDataSeeder extends Seeder
                 'start_datetime'        => date('Y-m-d 08:30:00', strtotime('+10 days')),
                 'end_datetime'          => date('Y-m-d 17:00:00', strtotime('+11 days')),
                 'category_id'           => $catMap['lomba-kompetisi'] ?? null,
-                'division_id'           => $divMap['teknologi'] ?? null,
+                'division_id'           => $divMap['intellogy'] ?? null,
                 'color'                 => '#2563EB',
                 'is_public'             => 1,
                 'allow_registration'    => 1,
                 'max_participants'      => 100,
                 'registration_deadline' => date('Y-m-d 23:59:59', strtotime('+8 days')),
-                'created_by'            => $teknoUser['id'] ?? $admin['id'],
+                'created_by'            => $intellogyUser['id'] ?? $admin['id'],
                 'created_at'            => $now,
                 'updated_at'            => $now,
             ],
@@ -91,13 +91,13 @@ class SampleDataSeeder extends Seeder
                 'start_datetime'        => date('Y-m-d 13:00:00', strtotime('+18 days')),
                 'end_datetime'          => date('Y-m-d 16:30:00', strtotime('+18 days')),
                 'category_id'           => $catMap['workshop-pelatihan'] ?? null,
-                'division_id'           => $divMap['teknologi'] ?? null,
+                'division_id'           => $divMap['intellogy'] ?? null,
                 'color'                 => '#10B981',
                 'is_public'             => 1,
                 'allow_registration'    => 1,
                 'max_participants'      => 40,
                 'registration_deadline' => date('Y-m-d 23:59:59', strtotime('+16 days')),
-                'created_by'            => $teknoUser['id'] ?? $admin['id'],
+                'created_by'            => $intellogyUser['id'] ?? $admin['id'],
                 'created_at'            => $now,
                 'updated_at'            => $now,
             ],
@@ -158,14 +158,14 @@ class SampleDataSeeder extends Seeder
         $proker = [
             'title'        => 'Pengembangan Website HIMATIKA Hub',
             'description'  => 'Membangun portal informasi terintegrasi dan dashboard monitoring proker untuk kepengurusan HIMATIKA.',
-            'division_id'  => $divMap['teknologi'] ?? 1,
+            'division_id'  => $divMap['intellogy'] ?? 1,
             'period_year'  => date('Y'),
             'period_term'  => 1,
             'start_date'   => date('Y-m-d', strtotime('-10 days')),
             'end_date'     => date('Y-m-d', strtotime('+30 days')),
             'status'       => 'active',
             'progress'     => 33,
-            'created_by'   => $teknoUser['id'] ?? $admin['id'],
+            'created_by'   => $intellogyUser['id'] ?? $admin['id'],
             'created_at'   => $now,
             'updated_at'   => $now,
         ];

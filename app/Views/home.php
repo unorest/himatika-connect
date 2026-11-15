@@ -74,7 +74,7 @@
             <?php foreach ($divisions as $div): ?>
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-brand-300 hover:shadow-lg transition group">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-4 shadow-sm" style="background-color: <?= esc($div['color']) ?>;">
-                        <i class="fa-solid fa-layer-group text-lg"></i>
+                        <i class="fa-solid fa-<?= esc($div['icon'] ?? 'layer-group') ?> text-lg"></i>
                     </div>
                     <h3 class="font-bold text-slate-900 group-hover:text-brand-600 transition"><?= esc($div['name']) ?></h3>
                     <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">

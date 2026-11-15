@@ -114,11 +114,14 @@ Buka browser di: **`http://localhost:8080`**
 
 | Role / Tingkat | Nama | Email Pengurus | Divisi |
 |---|---|---|---|
-| **Admin / BPH** | Admin HIMATIKA (Ketum) | `admin@himatika.org` | Badan Pengurus Harian |
-| **Kepala Divisi** | Siti Rahma | `advokasi@himatika.org` | Advokasi & Kesra |
-| **Kepala Divisi** | Devina Putri | `teknologi@himatika.org` | Teknologi & Inovasi |
-| **Kepala Divisi** | Budi Santoso | `humas@himatika.org` | Humas & Komunikasi |
-| **Staff Pengurus** | Rian Pratama | `rian.staff@himatika.org` | Advokasi |
+| **Admin / BPH** | Admin HIMATIKA (Ketum) | `admin@himatika.org` | Badan Pengurus Harian (Lintas Divisi) |
+| **Kepala Divisi** | Siti Rahma (Kadiv) | `stupport@himatika.org` | Divisi Stupport |
+| **Kepala Divisi** | Budi Santoso (Kadiv) | `pdd@himatika.org` | Divisi PDD |
+| **Kepala Divisi** | Ahmad Fauzan (Kadiv) | `pdsm@himatika.org` | Divisi PDSM |
+| **Kepala Divisi** | Devina Putri (Kadiv) | `intellogy@himatika.org` | Divisi Intellogy |
+| **Staff Pengurus** | Rian Pratama (Staff) | `staff.stupport@himatika.org` | Divisi Stupport |
+| **Staff Pengurus** | Nadia Putri (Staff) | `staff.pdd@himatika.org` | Divisi PDD |
+| **Staff Pengurus** | Farhan Malik (Staff) | `staff.intellogy@himatika.org` | Divisi Intellogy |
 
 ---
 

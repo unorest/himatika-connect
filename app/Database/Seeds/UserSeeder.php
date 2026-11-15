@@ -18,11 +18,10 @@ class UserSeeder extends Seeder
             $divMap[$d['slug']] = $d['id'];
         }
 
-        $bphId = $divMap['bph'] ?? 1;
-        $akademikId = $divMap['akademik'] ?? 2;
-        $humasId = $divMap['humas'] ?? 3;
-        $advokasiId = $divMap['advokasi'] ?? 4;
-        $teknologiId = $divMap['teknologi'] ?? 7;
+        $stupportId  = $divMap['stupport'] ?? null;
+        $pddId       = $divMap['pdd'] ?? null;
+        $pdsmId      = $divMap['pdsm'] ?? null;
+        $intellogyId = $divMap['intellogy'] ?? null;
 
         $users = [
             // Admin / Ketua Umum (BPH)
@@ -33,91 +32,106 @@ class UserSeeder extends Seeder
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'admin',
-                'division_id' => $bphId,
+                'division_id' => null, // BPH / Lintas Divisi
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv Akademik
+            // Kadiv Stupport
             [
-                'name'        => 'Ahmad Fauzan (Kadiv Akademik)',
+                'name'        => 'Siti Rahma (Kadiv Stupport)',
                 'nim'         => '22010002',
-                'email'       => 'akademik@himatika.org',
+                'email'       => 'stupport@himatika.org',
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'kadiv',
-                'division_id' => $akademikId,
+                'division_id' => $stupportId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv Advokasi
+            // Kadiv PDD
             [
-                'name'        => 'Siti Rahma (Kadiv Advokasi)',
+                'name'        => 'Budi Santoso (Kadiv PDD)',
                 'nim'         => '22010003',
-                'email'       => 'advokasi@himatika.org',
+                'email'       => 'pdd@himatika.org',
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'kadiv',
-                'division_id' => $advokasiId,
+                'division_id' => $pddId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv Humas
+            // Kadiv PDSM
             [
-                'name'        => 'Budi Santoso (Kadiv Humas)',
+                'name'        => 'Ahmad Fauzan (Kadiv PDSM)',
                 'nim'         => '22010004',
-                'email'       => 'humas@himatika.org',
+                'email'       => 'pdsm@himatika.org',
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'kadiv',
-                'division_id' => $humasId,
+                'division_id' => $pdsmId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv Teknologi
+            // Kadiv Intellogy
             [
-                'name'        => 'Devina Putri (Kadiv Teknologi)',
+                'name'        => 'Devina Putri (Kadiv Intellogy)',
                 'nim'         => '22010005',
-                'email'       => 'teknologi@himatika.org',
+                'email'       => 'intellogy@himatika.org',
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'kadiv',
-                'division_id' => $teknologiId,
+                'division_id' => $intellogyId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Staff Advokasi
+            // Staff Stupport
             [
-                'name'        => 'Rian Pratama (Staff Advokasi)',
+                'name'        => 'Rian Pratama (Staff Stupport)',
                 'nim'         => '23010010',
-                'email'       => 'rian.staff@himatika.org',
+                'email'       => 'staff.stupport@himatika.org',
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'staff',
-                'division_id' => $advokasiId,
+                'division_id' => $stupportId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Staff Teknologi
+            // Staff PDD
             [
-                'name'        => 'Farhan Malik (Staff Teknologi)',
+                'name'        => 'Nadia Putri (Staff PDD)',
                 'nim'         => '23010011',
-                'email'       => 'farhan.staff@himatika.org',
+                'email'       => 'staff.pdd@himatika.org',
                 'password'    => $defaultPassword,
                 'avatar'      => null,
                 'role'        => 'staff',
-                'division_id' => $teknologiId,
+                'division_id' => $pddId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            // Staff Intellogy
+            [
+                'name'        => 'Farhan Malik (Staff Intellogy)',
+                'nim'         => '23010012',
+                'email'       => 'staff.intellogy@himatika.org',
+                'password'    => $defaultPassword,
+                'avatar'      => null,
+                'role'        => 'staff',
+                'division_id' => $intellogyId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
         ];
 
+        $this->db->disableForeignKeyChecks();
+        $this->db->table('hmt_users')->truncate();
         $this->db->table('hmt_users')->insertBatch($users);
 
         // Update head_user_id di hmt_divisions
@@ -127,22 +141,21 @@ class UserSeeder extends Seeder
             $userMapByEmail[$u['email']] = $u['id'];
         }
 
-        if (isset($userMapByEmail['admin@himatika.org'], $divMap['bph'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['bph'])->update(['head_user_id' => $userMapByEmail['admin@himatika.org']]);
+        if (isset($userMapByEmail['stupport@himatika.org'], $divMap['stupport'])) {
+            $this->db->table('hmt_divisions')->where('id', $divMap['stupport'])->update(['head_user_id' => $userMapByEmail['stupport@himatika.org']]);
         }
-        if (isset($userMapByEmail['akademik@himatika.org'], $divMap['akademik'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['akademik'])->update(['head_user_id' => $userMapByEmail['akademik@himatika.org']]);
+        if (isset($userMapByEmail['pdd@himatika.org'], $divMap['pdd'])) {
+            $this->db->table('hmt_divisions')->where('id', $divMap['pdd'])->update(['head_user_id' => $userMapByEmail['pdd@himatika.org']]);
         }
-        if (isset($userMapByEmail['advokasi@himatika.org'], $divMap['advokasi'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['advokasi'])->update(['head_user_id' => $userMapByEmail['advokasi@himatika.org']]);
+        if (isset($userMapByEmail['pdsm@himatika.org'], $divMap['pdsm'])) {
+            $this->db->table('hmt_divisions')->where('id', $divMap['pdsm'])->update(['head_user_id' => $userMapByEmail['pdsm@himatika.org']]);
         }
-        if (isset($userMapByEmail['humas@himatika.org'], $divMap['humas'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['humas'])->update(['head_user_id' => $userMapByEmail['humas@himatika.org']]);
-        }
-        if (isset($userMapByEmail['teknologi@himatika.org'], $divMap['teknologi'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['teknologi'])->update(['head_user_id' => $userMapByEmail['teknologi@himatika.org']]);
+        if (isset($userMapByEmail['intellogy@himatika.org'], $divMap['intellogy'])) {
+            $this->db->table('hmt_divisions')->where('id', $divMap['intellogy'])->update(['head_user_id' => $userMapByEmail['intellogy@himatika.org']]);
         }
 
-        echo "✅ UserSeeder: " . count($users) . " pengguna contoh berhasil ditambahkan.\n";
+        $this->db->enableForeignKeyChecks();
+
+        echo "✅ UserSeeder: " . count($users) . " akun pengurus berhasil ditambahkan.\n";
     }
 }
