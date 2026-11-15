@@ -13,8 +13,10 @@ echo "=================================================="
 if [ ! -f .env ]; then
     echo "[1/6] Menyalin .env.example menjadi .env..."
     cp .env.example .env
+    sed -i "s/^app.baseURL/# app.baseURL/" .env
 else
     echo "[1/6] File .env sudah ada."
+    sed -i "s/^app.baseURL/# app.baseURL/" .env
 fi
 
 # 2. Pastikan paket PHP sistem & MariaDB terpasang
