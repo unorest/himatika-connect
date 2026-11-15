@@ -105,7 +105,7 @@
                 <?php if (session()->get('user_role') === 'admin'): ?>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 block pt-4 pb-1">Administrasi BPH</span>
 
-                    <a href="<?= site_url('dashboard/pengurus') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition text-slate-400 hover:bg-slate-800 hover:text-white">
+                    <a href="<?= site_url('dashboard/pengurus') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition <?= str_contains(uri_string(), 'dashboard/pengurus') ? 'bg-brand-600 text-white shadow-md font-bold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' ?>">
                         <i class="fa-solid fa-users-gear w-4 text-center"></i>
                         <span>Kelola Pengurus & Role</span>
                     </a>

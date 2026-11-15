@@ -65,4 +65,13 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('update/(:num)', 'PostManageController::update/$1');
         $routes->post('delete/(:num)', 'PostManageController::delete/$1');
     });
+
+    // Kelola Pengurus & Role (Khusus BPH / Admin)
+    $routes->group('pengurus', ['filter' => 'role:admin'], function ($routes) {
+        $routes->get('/', 'PengurusController::index');
+        $routes->post('store', 'PengurusController::store');
+        $routes->post('update/(:num)', 'PengurusController::update/$1');
+        $routes->post('toggle-status/(:num)', 'PengurusController::toggleStatus/$1');
+        $routes->post('delete/(:num)', 'PengurusController::delete/$1');
+    });
 });
