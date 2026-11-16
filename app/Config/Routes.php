@@ -21,6 +21,17 @@ $routes->group('forum', function ($routes) {
     $routes->post('upvote/(:num)', 'Forum::upvote/$1');
 });
 
+// Portal E-Sertifikat & Feedback Kegiatan
+$routes->group('sertifikat', function ($routes) {
+    $routes->get('/', 'CertificateController::index');
+    $routes->post('submit', 'CertificateController::submit');
+    $routes->get('sukses/(:segment)', 'CertificateController::sukses/$1');
+    $routes->get('download/(:segment)', 'CertificateController::download/$1');
+    $routes->get('preview/(:segment)', 'CertificateController::preview/$1');
+    $routes->get('verify', 'CertificateController::verify');
+    $routes->get('verify/(:segment)', 'CertificateController::verify/$1');
+});
+
 // Autentikasi Pengurus
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
@@ -74,4 +85,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('toggle-status/(:num)', 'PengurusController::toggleStatus/$1');
         $routes->post('delete/(:num)', 'PengurusController::delete/$1');
     });
+
+    // Rekap Feedback & E-Sertifikat
+    $routes->get('certificates', 'CertificateController::adminIndex');
 });

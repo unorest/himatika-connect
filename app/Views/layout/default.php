@@ -71,6 +71,10 @@
                     <span>Forum Aspirasi (Q&A)</span>
                     <span class="bg-rose-100 text-rose-600 text-[10px] px-2 py-0.5 rounded-full font-bold">Publik</span>
                 </a>
+                <a href="<?= site_url('sertifikat') ?>" class="hover:text-brand-600 flex items-center gap-1.5 transition <?= str_contains(uri_string(), 'sertifikat') ? 'text-brand-600' : '' ?>">
+                    <i class="fa-solid fa-award text-amber-500 text-xs"></i>
+                    <span>E-Sertifikat</span>
+                </a>
             </nav>
 
             <!-- Action Buttons -->
@@ -152,6 +156,7 @@
                         <li><a href="<?= site_url('/#berita') ?>" class="hover:text-white transition">Warta & Liputan</a></li>
                         <li><a href="<?= site_url('/#event') ?>" class="hover:text-white transition">Kalender Event</a></li>
                         <li><a href="<?= site_url('forum') ?>" class="hover:text-white transition">Forum Aspirasi (Q&A)</a></li>
+                        <li><a href="<?= site_url('sertifikat') ?>" class="hover:text-white transition">Klaim E-Sertifikat</a></li>
                         <li><a href="<?= site_url('login') ?>" class="hover:text-white transition">Login Pengurus</a></li>
                     </ul>
                 </div>
