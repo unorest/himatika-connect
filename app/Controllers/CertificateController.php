@@ -13,8 +13,51 @@ class CertificateController extends BaseController
 
     public function __construct()
     {
+        $this->ensureCertificatesTableExists();
         $this->certModel  = new CertificateModel();
         $this->eventModel = new EventModel();
+    }
+
+    /**
+     * Memastikan tabel hmt_certificates sudah ada di database agar tidak error 1146
+     */
+    protected function ensureCertificatesTableExists(): void
+    {
+        try {
+            $db = \Config\Database::connect();
+            if (!$db->tableExists('hmt_certificates')) {
+                $sql = "CREATE TABLE IF NOT EXISTS `hmt_certificates` (
+                  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+                  `certificate_no` varchar(64) NOT NULL,
+                  `verification_code` varchar(32) NOT NULL,
+                  `event_id` int(10) UNSIGNED DEFAULT NULL,
+                  `event_name` varchar(255) NOT NULL,
+                  `participant_name` varchar(255) NOT NULL,
+                  `identifier` varchar(50) DEFAULT NULL COMMENT 'NIM / NIP / No. Identitas',
+                  `email` varchar(150) NOT NULL,
+                  `institution` varchar(150) DEFAULT NULL,
+                  `role` varchar(50) NOT NULL DEFAULT 'Peserta',
+                  `rating` tinyint(1) DEFAULT NULL,
+                  `feedback` text DEFAULT NULL,
+                  `suggestions` text DEFAULT NULL,
+                  `download_count` int(11) NOT NULL DEFAULT 0,
+                  `last_downloaded_at` datetime DEFAULT NULL,
+                  `ip_address` varchar(45) DEFAULT NULL,
+                  `user_agent` text DEFAULT NULL,
+                  `created_at` datetime DEFAULT NULL,
+                  `updated_at` datetime DEFAULT NULL,
+                  `deleted_at` datetime DEFAULT NULL,
+                  PRIMARY KEY (`id`),
+                  UNIQUE KEY `certificate_no` (`certificate_no`),
+                  UNIQUE KEY `verification_code` (`verification_code`),
+                  KEY `event_id` (`event_id`),
+                  KEY `email` (`email`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+                $db->query($sql);
+            }
+        } catch (\Throwable $e) {
+            // Abaikan jika database belum siap
+        }
     }
 
     /**
