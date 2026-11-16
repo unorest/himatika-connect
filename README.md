@@ -59,18 +59,31 @@ bash start.sh
 Semua akun pengurus di bawah ini telah terdaftar otomatis dan siap digunakan untuk pengujian fitur internal:
 
 > 🔒 **Kata sandi untuk semua akun pengurus adalah:** **`password123`**  
-> 🌐 **URL Halaman Login Pengurus:** **`/login`**
+> 🌐 **URL Halaman Login Pengurus:** **`/login`** (Bisa login menggunakan **Email**, **NIM**, atau alias seperti `admin` / `superadmin`)
 
-| Tingkat Peran (Role) | Nama Pengurus | Email Login / NIM | Divisi Resmi | Akses Menu |
-|---|---|---|---|---|
-| **Admin / Ketum** | Admin HIMATIKA | `admin@himatika.org` / `22010001` | Badan Pengurus Harian (BPH) | Akses Penuh: Kelola Pengurus (RBAC), CMS, Kanban, Rapat, Moderasi |
-| **Kepala Divisi (Kadiv)** | Siti Rahma | `stupport@himatika.org` / `22010002` | **Divisi Stupport** | Workspace Kadiv, Kanban Proker, Agenda Rapat, Jawab Q&A |
-| **Kepala Divisi (Kadiv)** | Budi Santoso | `pdd@himatika.org` / `22010003` | **Divisi PDD** | Workspace Kadiv, Manajemen Berita & Publikasi, Liputan Acara |
-| **Kepala Divisi (Kadiv)** | Ahmad Fauzan | `pdsm@himatika.org` / `22010004` | **Divisi PDSM** | Workspace Kadiv, Kaderisasi, Log Harian, RSVP Rapat |
-| **Kepala Divisi (Kadiv)** | Devina Putri | `intellogy@himatika.org` / `22010005` | **Divisi Intellogy** | Workspace Kadiv, Riset IT, Proker Hackfest, Daily Tracker |
-| **Staff Anggota** | Rian Pratama | `staff.stupport@himatika.org` / `23010010` | **Divisi Stupport** | Workspace Staff, Papan Kanban, Update Status Tugas, Presensi |
-| **Staff Anggota** | Nadia Putri | `staff.pdd@himatika.org` / `23010011` | **Divisi PDD** | Workspace Staff, Manajemen Konten Berita, Laporan Progres |
-| **Staff Anggota** | Farhan Malik | `staff.intellogy@himatika.org` / `23010012` | **Divisi Intellogy** | Workspace Staff, Pelaporan Tugas Coding, RSVP Rapat |
+| No | Nama Pengurus | Jabatan | Role (Akses) | Email Login | NIM Login | Divisi |
+|:---:|---|---|---|---|---|---|
+| 1 | **Rabiah Aladawiyah** | Ketua Himpunan | `admin` (Super Admin) | `rabiah@himatika.org` | `22010001` | Badan Pengurus Harian (BPH) |
+| 2 | **Samuel Binsar Aditya Simamora** | Wakil Ketua | `admin` (Super Admin) | `samuel@himatika.org` | `22010002` | Badan Pengurus Harian (BPH) |
+| 3 | **Vina Lestari** | Sekretaris 1 | `staff` (Anggota) | `vina@himatika.org` | `22010003` | Badan Pengurus Harian (BPH) |
+| 4 | **Nadin Nadilah** | Sekretaris 2 | `staff` (Anggota) | `nadin@himatika.org` | `22010004` | Badan Pengurus Harian (BPH) |
+| 5 | **Dian Avila** | Bendahara | `staff` (Anggota) | `dian@himatika.org` | `22010005` | Badan Pengurus Harian (BPH) |
+| 6 | **M. Rendy Amril** | Ketua Stupport | `kadiv` (Kepala Divisi) | `rendy@himatika.org` | `22010006` | Divisi Stupport |
+| 7 | **Hikmah Indriyani** | Anggota Stupport | `staff` (Anggota) | `hikmah@himatika.org` | `22010007` | Divisi Stupport |
+| 8 | **M. Naufal Adzim Ramadhan** | Anggota Stupport | `staff` (Anggota) | `naufal@himatika.org` | `22010008` | Divisi Stupport |
+| 9 | **Linawati** | Anggota Stupport | `staff` (Anggota) | `linawati@himatika.org` | `22010009` | Divisi Stupport |
+| 10 | **Intan Puji Hirdian** | Ketua PDD | `kadiv` (Kepala Divisi) | `intan@himatika.org` | `22010010` | Divisi PDD |
+| 11 | **Ratu Balqis Mantika** | Anggota PDD | `staff` (Anggota) | `balqis@himatika.org` | `22010011` | Divisi PDD |
+| 12 | **Triyas Apritantina** | Anggota PDD | `staff` (Anggota) | `triyas@himatika.org` | `22010012` | Divisi PDD |
+| 13 | **Cut Evelyn Anwar** | Ketua PSDM | `kadiv` (Kepala Divisi) | `cut.evelyn@himatika.org` | `22010013` | Divisi PSDM |
+| 14 | **Arsita Rahmawati Dewi** | Anggota PSDM | `staff` (Anggota) | `arsita@himatika.org` | `22010014` | Divisi PSDM |
+| 15 | **M. Dzaky Ghaly Ramdhani** | Anggota PSDM | `staff` (Anggota) | `dzaky@himatika.org` | `22010015` | Divisi PSDM |
+| 16 | **Johan Sudanta Hla** | Anggota PSDM | `staff` (Anggota) | `johan@himatika.org` | `22010016` | Divisi PSDM |
+| 17 | **Risma Diah Wulandari** | Anggota PSDM | `staff` (Anggota) | `risma@himatika.org` | `22010017` | Divisi PSDM |
+| 18 | **Raden Dimas Taufik Rahmat** | Ketua Intellogy | `kadiv` (Kepala Divisi) | `dimas@himatika.org` | `22010018` | Divisi Intellogy |
+| 19 | **Fajar Mauludin** | Anggota Intellogy | `staff` (Anggota) | `fajar@himatika.org` | `22010019` | Divisi Intellogy |
+| 20 | **Mochammad Wahyu R** | Anggota Intellogy | `staff` (Anggota) | `wahyu@himatika.org` | `22010020` | Divisi Intellogy |
+| 21 | **Chandra Handika** | Anggota Intellogy | `staff` (Anggota) | `chandra@himatika.org` | `22010021` | Divisi Intellogy |
 
 ---
 

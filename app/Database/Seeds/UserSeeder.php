@@ -11,7 +11,7 @@ class UserSeeder extends Seeder
         $now = date('Y-m-d H:i:s');
         $defaultPassword = password_hash('password123', PASSWORD_BCRYPT);
 
-        // Ambil divisi yang sudah ada untuk mapping id
+        // Ambil ID divisi yang ada
         $divisions = $this->db->table('hmt_divisions')->get()->getResultArray();
         $divMap = [];
         foreach ($divisions as $d) {
@@ -20,109 +20,266 @@ class UserSeeder extends Seeder
 
         $stupportId  = $divMap['stupport'] ?? null;
         $pddId       = $divMap['pdd'] ?? null;
-        $pdsmId      = $divMap['pdsm'] ?? null;
+        $psdmId      = $divMap['pdsm'] ?? ($divMap['psdm'] ?? null);
         $intellogyId = $divMap['intellogy'] ?? null;
 
-        $users = [
-            // Admin / Ketua Umum (BPH)
+        $members = [
+            // BPH (Badan Pengurus Harian)
             [
-                'name'        => 'Admin HIMATIKA (Ketua Umum)',
+                'id'          => 1,
+                'name'        => 'Rabiah Aladawiyah',
                 'nim'         => '22010001',
-                'email'       => 'admin@himatika.org',
+                'email'       => 'rabiah@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'admin',
-                'division_id' => null, // BPH / Lintas Divisi
+                'role'        => 'admin', // Super Admin (Ketua)
+                'division_id' => null,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv Stupport
             [
-                'name'        => 'Siti Rahma (Kadiv Stupport)',
+                'id'          => 2,
+                'name'        => 'Samuel Binsar Aditya Simamora',
                 'nim'         => '22010002',
-                'email'       => 'stupport@himatika.org',
+                'email'       => 'samuel@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'kadiv',
+                'role'        => 'admin', // Super Admin (Wakil Ketua)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 3,
+                'name'        => 'Vina Lestari',
+                'nim'         => '22010003',
+                'email'       => 'vina@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota (Sekretaris 1)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 4,
+                'name'        => 'Nadin Nadilah',
+                'nim'         => '22010004',
+                'email'       => 'nadin@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota (Sekretaris 2)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 5,
+                'name'        => 'Dian Avila',
+                'nim'         => '22010005',
+                'email'       => 'dian@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota (Bendahara)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi Stupport
+            [
+                'id'          => 6,
+                'name'        => 'M. Rendy Amril',
+                'nim'         => '22010006',
+                'email'       => 'rendy@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi Stupport
                 'division_id' => $stupportId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv PDD
             [
-                'name'        => 'Budi Santoso (Kadiv PDD)',
-                'nim'         => '22010003',
-                'email'       => 'pdd@himatika.org',
+                'id'          => 7,
+                'name'        => 'Hikmah Indriyani',
+                'nim'         => '23010007',
+                'email'       => 'hikmah@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'kadiv',
+                'role'        => 'staff', // Anggota Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 8,
+                'name'        => 'M. Naufal Adzim Ramadhan',
+                'nim'         => '23010008',
+                'email'       => 'naufal@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 9,
+                'name'        => 'Linawati',
+                'nim'         => '23010009',
+                'email'       => 'linawati@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi PDD
+            [
+                'id'          => 10,
+                'name'        => 'Intan Puji Hirdian',
+                'nim'         => '22010010',
+                'email'       => 'intan@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi PDD
                 'division_id' => $pddId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv PDSM
             [
-                'name'        => 'Ahmad Fauzan (Kadiv PDSM)',
-                'nim'         => '22010004',
-                'email'       => 'pdsm@himatika.org',
+                'id'          => 11,
+                'name'        => 'Ratu Balqis Mantika',
+                'nim'         => '23010011',
+                'email'       => 'balqis@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'kadiv',
-                'division_id' => $pdsmId,
+                'role'        => 'staff', // Anggota PDD
+                'division_id' => $pddId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Kadiv Intellogy
             [
-                'name'        => 'Devina Putri (Kadiv Intellogy)',
-                'nim'         => '22010005',
-                'email'       => 'intellogy@himatika.org',
+                'id'          => 12,
+                'name'        => 'Triyas Apritantina',
+                'nim'         => '23010012',
+                'email'       => 'triyas@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'kadiv',
+                'role'        => 'staff', // Anggota PDD
+                'division_id' => $pddId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi PSDM
+            [
+                'id'          => 13,
+                'name'        => 'Cut Evelyn Anwar',
+                'nim'         => '22010013',
+                'email'       => 'evelyn@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 14,
+                'name'        => 'Arsita Rahmawati Dewi',
+                'nim'         => '23010014',
+                'email'       => 'arsita@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 15,
+                'name'        => 'M. Dzaky Ghaly Ramdhani',
+                'nim'         => '23010015',
+                'email'       => 'dzaky@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 16,
+                'name'        => 'Johan Sudanta Hla',
+                'nim'         => '23010016',
+                'email'       => 'johan@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 17,
+                'name'        => 'Risma Diah Wulandari',
+                'nim'         => '23010017',
+                'email'       => 'risma@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi Intellogy
+            [
+                'id'          => 18,
+                'name'        => 'Raden Dimas Taufik Rahmat',
+                'nim'         => '22010018',
+                'email'       => 'dimas@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi Intellogy
                 'division_id' => $intellogyId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Staff Stupport
             [
-                'name'        => 'Rian Pratama (Staff Stupport)',
-                'nim'         => '23010010',
-                'email'       => 'staff.stupport@himatika.org',
+                'id'          => 19,
+                'name'        => 'Fajar Mauludin',
+                'nim'         => '23010019',
+                'email'       => 'fajar@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'staff',
-                'division_id' => $stupportId,
+                'role'        => 'staff', // Anggota Intellogy
+                'division_id' => $intellogyId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Staff PDD
             [
-                'name'        => 'Nadia Putri (Staff PDD)',
-                'nim'         => '23010011',
-                'email'       => 'staff.pdd@himatika.org',
+                'id'          => 20,
+                'name'        => 'Mochammad Wahyu R',
+                'nim'         => '23010020',
+                'email'       => 'wahyu@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'staff',
-                'division_id' => $pddId,
+                'role'        => 'staff', // Anggota Intellogy
+                'division_id' => $intellogyId,
                 'is_active'   => 1,
                 'created_at'  => $now,
                 'updated_at'  => $now,
             ],
-            // Staff Intellogy
             [
-                'name'        => 'Farhan Malik (Staff Intellogy)',
-                'nim'         => '23010012',
-                'email'       => 'staff.intellogy@himatika.org',
+                'id'          => 21,
+                'name'        => 'Chandra Handika',
+                'nim'         => '23010021',
+                'email'       => 'chandra@himatika.org',
                 'password'    => $defaultPassword,
-                'avatar'      => null,
-                'role'        => 'staff',
+                'role'        => 'staff', // Anggota Intellogy
                 'division_id' => $intellogyId,
                 'is_active'   => 1,
                 'created_at'  => $now,
@@ -132,30 +289,24 @@ class UserSeeder extends Seeder
 
         $this->db->disableForeignKeyChecks();
         $this->db->table('hmt_users')->truncate();
-        $this->db->table('hmt_users')->insertBatch($users);
+        $this->db->table('hmt_users')->insertBatch($members);
 
         // Update head_user_id di hmt_divisions
-        $usersCreated = $this->db->table('hmt_users')->get()->getResultArray();
-        $userMapByEmail = [];
-        foreach ($usersCreated as $u) {
-            $userMapByEmail[$u['email']] = $u['id'];
+        if ($stupportId) {
+            $this->db->table('hmt_divisions')->where('id', $stupportId)->update(['head_user_id' => 6]);
         }
-
-        if (isset($userMapByEmail['stupport@himatika.org'], $divMap['stupport'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['stupport'])->update(['head_user_id' => $userMapByEmail['stupport@himatika.org']]);
+        if ($pddId) {
+            $this->db->table('hmt_divisions')->where('id', $pddId)->update(['head_user_id' => 10]);
         }
-        if (isset($userMapByEmail['pdd@himatika.org'], $divMap['pdd'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['pdd'])->update(['head_user_id' => $userMapByEmail['pdd@himatika.org']]);
+        if ($psdmId) {
+            $this->db->table('hmt_divisions')->where('id', $psdmId)->update(['head_user_id' => 13]);
         }
-        if (isset($userMapByEmail['pdsm@himatika.org'], $divMap['pdsm'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['pdsm'])->update(['head_user_id' => $userMapByEmail['pdsm@himatika.org']]);
-        }
-        if (isset($userMapByEmail['intellogy@himatika.org'], $divMap['intellogy'])) {
-            $this->db->table('hmt_divisions')->where('id', $divMap['intellogy'])->update(['head_user_id' => $userMapByEmail['intellogy@himatika.org']]);
+        if ($intellogyId) {
+            $this->db->table('hmt_divisions')->where('id', $intellogyId)->update(['head_user_id' => 18]);
         }
 
         $this->db->enableForeignKeyChecks();
 
-        echo "✅ UserSeeder: " . count($users) . " akun pengurus berhasil ditambahkan.\n";
+        echo "✅ UserSeeder: 21 anggota & pimpinan resmi HIMATIKA berhasil ditambahkan.\n";
     }
 }

@@ -1,0 +1,330 @@
+<?php
+
+namespace App\Database\Migrations;
+
+use CodeIgniter\Database\Migration;
+
+class UpdateMembersList extends Migration
+{
+    public function up(): void
+    {
+        $this->db->disableForeignKeyChecks();
+
+        $now = date('Y-m-d H:i:s');
+        $defaultPassword = password_hash('password123', PASSWORD_BCRYPT);
+
+        // 1. Pastikan nama Divisi PSDM dan slugnya sinkron
+        $this->db->table('hmt_divisions')->where('slug', 'pdsm')->update([
+            'name' => 'Divisi PSDM',
+            'description' => 'Pengembangan Sumber Daya Mahasiswa — bertanggung jawab atas kaderisasi, pelatihan kepemimpinan, dan peningkatan prestasi akademik anggota.',
+        ]);
+
+        $divisions = $this->db->table('hmt_divisions')->get()->getResultArray();
+        $divMap = [];
+        foreach ($divisions as $d) {
+            $divMap[$d['slug']] = $d['id'];
+        }
+
+        $stupportId  = $divMap['stupport'] ?? null;
+        $pddId       = $divMap['pdd'] ?? null;
+        $psdmId      = $divMap['pdsm'] ?? ($divMap['psdm'] ?? null);
+        $intellogyId = $divMap['intellogy'] ?? null;
+
+        // 2. Daftar 21 Pengurus Resmi HIMATIKA
+        $members = [
+            // BPH (Badan Pengurus Harian)
+            [
+                'id'          => 1,
+                'name'        => 'Rabiah Aladawiyah',
+                'nim'         => '22010001',
+                'email'       => 'rabiah@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'admin', // Super Admin
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 2,
+                'name'        => 'Samuel Binsar Aditya Simamora',
+                'nim'         => '22010002',
+                'email'       => 'samuel@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'admin', // Super Admin
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 3,
+                'name'        => 'Vina Lestari',
+                'nim'         => '22010003',
+                'email'       => 'vina@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota (Sekretaris 1)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 4,
+                'name'        => 'Nadin Nadilah',
+                'nim'         => '22010004',
+                'email'       => 'nadin@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota (Sekretaris 2)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 5,
+                'name'        => 'Dian Avila',
+                'nim'         => '22010005',
+                'email'       => 'dian@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota (Bendahara)
+                'division_id' => null,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi Stupport
+            [
+                'id'          => 6,
+                'name'        => 'M. Rendy Amril',
+                'nim'         => '22010006',
+                'email'       => 'rendy@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 7,
+                'name'        => 'Hikmah Indriyani',
+                'nim'         => '23010007',
+                'email'       => 'hikmah@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 8,
+                'name'        => 'M. Naufal Adzim Ramadhan',
+                'nim'         => '23010008',
+                'email'       => 'naufal@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 9,
+                'name'        => 'Linawati',
+                'nim'         => '23010009',
+                'email'       => 'linawati@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Stupport
+                'division_id' => $stupportId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi PDD (Publikasi, Dekorasi & Dokumentasi)
+            [
+                'id'          => 10,
+                'name'        => 'Intan Puji Hirdian',
+                'nim'         => '22010010',
+                'email'       => 'intan@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi PDD
+                'division_id' => $pddId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 11,
+                'name'        => 'Ratu Balqis Mantika',
+                'nim'         => '23010011',
+                'email'       => 'balqis@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PDD
+                'division_id' => $pddId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 12,
+                'name'        => 'Triyas Apritantina',
+                'nim'         => '23010012',
+                'email'       => 'triyas@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PDD
+                'division_id' => $pddId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi PSDM (Pengembangan Sumber Daya Mahasiswa)
+            [
+                'id'          => 13,
+                'name'        => 'Cut Evelyn Anwar',
+                'nim'         => '22010013',
+                'email'       => 'evelyn@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 14,
+                'name'        => 'Arsita Rahmawati Dewi',
+                'nim'         => '23010014',
+                'email'       => 'arsita@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 15,
+                'name'        => 'M. Dzaky Ghaly Ramdhani',
+                'nim'         => '23010015',
+                'email'       => 'dzaky@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 16,
+                'name'        => 'Johan Sudanta Hla',
+                'nim'         => '23010016',
+                'email'       => 'johan@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 17,
+                'name'        => 'Risma Diah Wulandari',
+                'nim'         => '23010017',
+                'email'       => 'risma@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota PSDM
+                'division_id' => $psdmId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+
+            // Divisi Intellogy (Intelligence & Technology)
+            [
+                'id'          => 18,
+                'name'        => 'Raden Dimas Taufik Rahmat',
+                'nim'         => '22010018',
+                'email'       => 'dimas@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'kadiv', // Kepala Divisi Intellogy
+                'division_id' => $intellogyId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 19,
+                'name'        => 'Fajar Mauludin',
+                'nim'         => '23010019',
+                'email'       => 'fajar@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Intellogy
+                'division_id' => $intellogyId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 20,
+                'name'        => 'Mochammad Wahyu R',
+                'nim'         => '23010020',
+                'email'       => 'wahyu@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Intellogy
+                'division_id' => $intellogyId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+            [
+                'id'          => 21,
+                'name'        => 'Chandra Handika',
+                'nim'         => '23010021',
+                'email'       => 'chandra@himatika.org',
+                'password'    => $defaultPassword,
+                'role'        => 'staff', // Anggota Intellogy
+                'division_id' => $intellogyId,
+                'is_active'   => 1,
+                'created_at'  => $now,
+                'updated_at'  => $now,
+            ],
+        ];
+
+        // Kosongkan dan masukkan 21 anggota baru
+        $this->db->table('hmt_users')->truncate();
+        $this->db->table('hmt_users')->insertBatch($members);
+
+        // Update head_user_id di hmt_divisions
+        if ($stupportId) {
+            $this->db->table('hmt_divisions')->where('id', $stupportId)->update(['head_user_id' => 6]); // M. Rendy Amril
+        }
+        if ($pddId) {
+            $this->db->table('hmt_divisions')->where('id', $pddId)->update(['head_user_id' => 10]); // Intan Puji Hirdian
+        }
+        if ($psdmId) {
+            $this->db->table('hmt_divisions')->where('id', $psdmId)->update(['head_user_id' => 13]); // Cut Evelyn Anwar
+        }
+        if ($intellogyId) {
+            $this->db->table('hmt_divisions')->where('id', $intellogyId)->update(['head_user_id' => 18]); // Raden Dimas Taufik Rahmat
+        }
+
+        // Pastikan relasi tabel lain merujuk ke user yang valid
+        $this->db->table('hmt_posts')->update(['author_id' => 10]); // Intan (PDD)
+        $this->db->table('hmt_events')->update(['created_by' => 18]); // Dimas (Intellogy)
+        $this->db->table('hmt_work_programs')->update(['created_by' => 1]); // Rabiah (Ketum)
+        $this->db->table('hmt_tasks')->update(['created_by' => 18, 'assigned_to' => 20]); // Dimas & Wahyu
+        $this->db->table('hmt_schedules')->update(['created_by' => 1]); // Rabiah
+
+        $this->db->enableForeignKeyChecks();
+    }
+
+    public function down(): void
+    {
+        // No down migration needed
+    }
+}

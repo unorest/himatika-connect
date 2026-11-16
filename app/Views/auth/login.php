@@ -118,17 +118,17 @@
                     Demo Akun Uji Coba (Klik Cepat)
                 </span>
                 <div class="grid grid-cols-3 gap-2 text-xs">
-                    <button type="button" onclick="fillCredential('admin@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-brand-500 text-left transition group">
-                        <div class="text-[10px] font-bold uppercase text-brand-400">Admin/BPH</div>
-                        <div class="font-semibold text-slate-300 truncate mt-0.5">admin@</div>
+                    <button type="button" onclick="fillCredential('rabiah@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-brand-500 text-left transition group">
+                        <div class="text-[10px] font-bold uppercase text-brand-400">Ketua (Admin)</div>
+                        <div class="font-semibold text-slate-300 truncate mt-0.5">rabiah@</div>
                     </button>
-                    <button type="button" onclick="fillCredential('akademik@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-emerald-500 text-left transition group">
+                    <button type="button" onclick="fillCredential('dimas@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-emerald-500 text-left transition group">
                         <div class="text-[10px] font-bold uppercase text-emerald-400">Kadiv</div>
-                        <div class="font-semibold text-slate-300 truncate mt-0.5">akademik@</div>
+                        <div class="font-semibold text-slate-300 truncate mt-0.5">dimas@</div>
                     </button>
-                    <button type="button" onclick="fillCredential('rian.staff@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-purple-500 text-left transition group">
-                        <div class="text-[10px] font-bold uppercase text-purple-400">Staff</div>
-                        <div class="font-semibold text-slate-300 truncate mt-0.5">rian.staff@</div>
+                    <button type="button" onclick="fillCredential('vina@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-purple-500 text-left transition group">
+                        <div class="text-[10px] font-bold uppercase text-purple-400">Anggota</div>
+                        <div class="font-semibold text-slate-300 truncate mt-0.5">vina@</div>
                     </button>
                 </div>
             </div>

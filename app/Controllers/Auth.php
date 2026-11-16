@@ -41,12 +41,17 @@ class Auth extends BaseController
         $loginId  = trim($this->request->getPost('login_id'));
         $password = $this->request->getPost('password');
 
-        // Cari berdasarkan Email atau NIM
-        $user = $this->userModel->groupStart()
-                                ->where('email', $loginId)
-                                ->orWhere('nim', $loginId)
-                                ->groupEnd()
-                                ->first();
+        // Cari berdasarkan Email, NIM, atau alias admin
+        $builder = $this->userModel->groupStart()
+                                   ->where('email', $loginId)
+                                   ->orWhere('nim', $loginId);
+
+        if (in_array(strtolower($loginId), ['admin', 'superadmin', 'ketua'], true)) {
+            $builder->orWhere('email', 'rabiah@himatika.org')
+                    ->orWhere('role', 'admin');
+        }
+
+        $user = $builder->groupEnd()->first();
 
         if (!$user) {
             return redirect()->back()->withInput()->with('error', 'Akun tidak ditemukan. Periksa kembali Email atau NIM Anda.');
