@@ -88,4 +88,10 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
 
     // Rekap Feedback & E-Sertifikat
     $routes->get('certificates', 'CertificateController::adminIndex');
+
+    // Profil & Ganti Kata Sandi (Untuk semua role: admin, kadiv, staff)
+    $routes->get('profile', 'ProfileController::index');
+    $routes->post('profile/password', 'ProfileController::updatePassword');
+    $routes->post('profile/update', 'ProfileController::updateProfile');
+    $routes->get('change-password', 'ProfileController::index');
 });

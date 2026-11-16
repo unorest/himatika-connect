@@ -44,13 +44,16 @@
             </div>
 
             <!-- User Quick Card -->
-            <div class="p-4 mx-4 mt-4 rounded-2xl bg-slate-800/80 border border-slate-700/80">
+            <a href="<?= site_url('dashboard/profile') ?>" class="block p-4 mx-4 mt-4 rounded-2xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 transition group" title="Lihat Profil & Ganti Kata Sandi">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-brand-600/30 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-sm">
+                    <div class="w-10 h-10 rounded-xl bg-brand-600/30 border border-brand-500/30 text-brand-400 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition">
                         <i class="fa-solid fa-user-tie"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-xs font-bold text-white truncate"><?= esc(session()->get('user_name')) ?></h4>
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-white truncate"><?= esc(session()->get('user_name')) ?></h4>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-500 group-hover:text-white transition"></i>
+                        </div>
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <?php
                             $role = session()->get('user_role');
@@ -67,7 +70,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Menu List -->
             <nav class="p-4 space-y-1.5 text-xs font-semibold">
@@ -115,6 +118,13 @@
                         <span>Kelola Pengurus & Role</span>
                     </a>
                 <?php endif; ?>
+
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-3 block pt-4 pb-1">Pengaturan Akun</span>
+
+                <a href="<?= site_url('dashboard/profile') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition <?= str_contains(uri_string(), 'dashboard/profile') ? 'bg-brand-600 text-white shadow-md font-bold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' ?>">
+                    <i class="fa-solid fa-key w-4 text-center"></i>
+                    <span>Profil & Ganti Password</span>
+                </a>
             </nav>
         </div>
 
@@ -140,6 +150,11 @@
             </div>
 
             <div class="flex items-center gap-3">
+                <a href="<?= site_url('dashboard/profile') ?>" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border border-amber-300/60 transition flex items-center gap-2">
+                    <i class="fa-solid fa-key text-[11px] text-amber-600"></i>
+                    <span>Ganti Password</span>
+                </a>
+
                 <a href="<?= site_url('/') ?>" target="_blank" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition flex items-center gap-1.5">
                     <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-brand-600"></i>
                     <span>Buka Portal Publik</span>
