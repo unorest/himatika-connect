@@ -1,0 +1,11 @@
+.git
+.github
+.env
+tests
+writable/cache/*
+writable/logs/*
+!writable/cache/index.html
+!writable/logs/index.html
+start.sh
+setup.sh
+test_pdf.php
