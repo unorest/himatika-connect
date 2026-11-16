@@ -384,10 +384,14 @@ CREATE TABLE `hmt_work_programs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
+-- --------------------------------------------------------
 -- Dumping data for table: hmt_work_programs
 -- --------------------------------------------------------
 INSERT INTO `hmt_work_programs` (`id`, `title`, `description`, `division_id`, `period_year`, `period_term`, `start_date`, `end_date`, `status`, `progress`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Pengembangan Website HIMATIKA Hub', 'Membangun portal informasi terintegrasi dan dashboard monitoring proker untuk kepengurusan HIMATIKA.', 4, YEAR(NOW()), 1, CURDATE() - INTERVAL 10 DAY, CURDATE() + INTERVAL 30 DAY, 'active', 33, 18, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL);
+(1, 'Inventarisasi & Pemeliharaan Logistik Himpunan', 'Pengadaan aset inventaris sekretariat, pemeliharaan perangkat, dan rekap sarana prasarana.', 1, YEAR(NOW()), 1, CURDATE() - INTERVAL 15 DAY, CURDATE() + INTERVAL 45 DAY, 'active', 33, 6, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(2, 'Publikasi Konten Branding & Dokumentasi Acara', 'Desain visual media sosial, pengelolaan feed Instagram, dan liputan dokumentasi kegiatan himpunan.', 2, YEAR(NOW()), 1, CURDATE() - INTERVAL 10 DAY, CURDATE() + INTERVAL 60 DAY, 'active', 33, 10, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(3, 'Kaderisasi & Pelatihan Kepemimpinan Mahasiswa (LKMM)', 'Program pembinaan soft skills, upgrading internal pengurus, dan workshop leadership.', 3, YEAR(NOW()), 1, CURDATE() - INTERVAL 5 DAY, CURDATE() + INTERVAL 50 DAY, 'active', 33, 13, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(4, 'Pengembangan Website HIMATIKA Hub', 'Membangun portal informasi terintegrasi dan dashboard monitoring proker untuk kepengurusan HIMATIKA.', 4, YEAR(NOW()), 1, CURDATE() - INTERVAL 10 DAY, CURDATE() + INTERVAL 30 DAY, 'active', 33, 18, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL);
 
 -- --------------------------------------------------------
 -- Table structure for: hmt_tasks
@@ -418,12 +422,29 @@ CREATE TABLE `hmt_tasks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
+-- --------------------------------------------------------
 -- Dumping data for table: hmt_tasks
 -- --------------------------------------------------------
 INSERT INTO `hmt_tasks` (`id`, `work_program_id`, `title`, `description`, `status`, `priority`, `assigned_to`, `due_date`, `sort_order`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 'Perancangan Skema Database (ERD) & Migrasi', 'Menyusun skema 18 tabel dan menyiapkan migrasi CodeIgniter 4.', 'done', 'high', 20, CURDATE() + INTERVAL 1 DAY, 1, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(2, 1, 'Pembuatan Halaman Landing Page Publik & Formulir Q&A', 'Implementasi UI modern, responsif, dan interaktif untuk umum.', 'in_progress', 'high', 19, CURDATE() + INTERVAL 5 DAY, 2, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(3, 1, 'Integrasi Notifikasi Webhook Discord/WhatsApp', 'Mengirim notifikasi pertanyaan aspirasi baru ke channel koordinasi himpunan.', 'todo', 'medium', 21, CURDATE() + INTERVAL 12 DAY, 3, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL);
+-- Proker 1: Divisi Stupport
+(1, 1, 'Pembuatan SOP Peminjaman Barang & Aset Himatika', 'Menyusun alur peminjaman logistik sekretariat untuk kegiatan kemahasiswaan.', 'done', 'medium', 7, CURDATE() - INTERVAL 5 DAY, 1, 6, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(2, 1, 'Audit & Stock Opname Inventaris Ruang Himpunan', 'Pengecekan fisik proyektor, kabel roll, printer, dan sound system sekretariat.', 'in_progress', 'high', 6, CURDATE() + INTERVAL 3 DAY, 2, 6, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(3, 1, 'Pengadaan ATK & Kelengkapan Administrasi Triwulan', 'Pembelian kertas, tinta stempel, dan map arsip persuratan himpunan.', 'todo', 'medium', 8, CURDATE() + INTERVAL 10 DAY, 3, 6, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+
+-- Proker 2: Divisi PDD
+(4, 2, 'Perancangan Template Feed & Story Instagram Resmi', 'Menyusun panduan color palette, typography, dan asset grafis HIMATIKA.', 'done', 'high', 10, CURDATE() - INTERVAL 2 DAY, 1, 10, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(5, 2, 'Liputan Dokumentasi & Rilis Foto Pelantikan Pengurus', 'Editing foto kegiatan pelantikan untuk publikasi website dan sorotan IG.', 'in_progress', 'high', 11, CURDATE() + INTERVAL 2 DAY, 2, 10, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(6, 2, 'Penyusunan Kalender Konten Edukasi Teknologi Mingguan', 'Riset topik artikel info-grafis tech tips untuk mahasiswa.', 'todo', 'medium', 12, CURDATE() + INTERVAL 8 DAY, 3, 10, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+
+-- Proker 3: Divisi PSDM
+(7, 3, 'Evaluasi Kuesioner Need Assessment Anggota Baru', 'Menganalisis minat bakat mahasiswa angkatan baru untuk pemetaan divisi.', 'done', 'medium', 14, CURDATE() - INTERVAL 1 DAY, 1, 13, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(8, 3, 'Penyusunan Kurikulum & Silabus Materi LKMM Tingkat Dasar', 'Menyusun materi manajemen waktu, etika organisasi, dan problem solving.', 'in_progress', 'critical', 13, CURDATE() + INTERVAL 4 DAY, 2, 13, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(9, 3, 'Pendataan Peserta & Koordinasi Pemateri Alumni', 'Menghubungi pembicara seminar leadership dan menyiapkan surat undangan.', 'todo', 'high', 15, CURDATE() + INTERVAL 9 DAY, 3, 13, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+
+-- Proker 4: Divisi Intellogy
+(10, 4, 'Perancangan Skema Database (ERD) & Migrasi', 'Menyusun skema 18 tabel dan menyiapkan migrasi CodeIgniter 4.', 'done', 'high', 20, CURDATE() + INTERVAL 1 DAY, 1, 18, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(11, 4, 'Pembuatan Halaman Landing Page Publik & Formulir Q&A', 'Implementasi UI modern, responsif, dan interaktif untuk umum.', 'in_progress', 'high', 19, CURDATE() + INTERVAL 5 DAY, 2, 18, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL),
+(12, 4, 'Integrasi Notifikasi Webhook Discord/WhatsApp', 'Mengirim notifikasi pertanyaan aspirasi baru ke channel koordinasi himpunan.', 'todo', 'medium', 21, CURDATE() + INTERVAL 12 DAY, 3, 18, '2026-11-16 14:53:27', '2026-11-16 14:53:27', NULL);
 
 -- --------------------------------------------------------
 -- Table structure for: hmt_task_progress_logs

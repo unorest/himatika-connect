@@ -58,18 +58,73 @@ class TaskController extends BaseController
         if ($userRole !== 'admin' && !empty($userDivisionId)) {
             $membersQuery->where('division_id', $userDivisionId);
         }
-        $members = $membersQuery->findAll();
+        $members = $membersQuery->orderBy('name', 'ASC')->findAll();
+
+        // Ambil daftar divisi untuk opsi pembuatan proker (khusus Admin)
+        $divisions = (new \App\Models\DivisionModel())->where('deleted_at', null)->orderBy('name', 'ASC')->findAll();
 
         $data = [
-            'title'         => 'Task Tracker Kanban — HIMATIKA Hub',
-            'kanban'        => $kanban,
-            'programs'      => $programs,
+            'title'             => 'Task Tracker Kanban — HIMATIKA Hub',
+            'kanban'            => $kanban,
+            'programs'          => $programs,
             'selectedProgramId' => $programId,
-            'activeProgram' => $activeProgram,
-            'members'       => $members,
+            'activeProgram'     => $activeProgram,
+            'members'           => $members,
+            'divisions'         => $divisions,
+            'userRole'          => $userRole,
+            'userDivisionId'    => $userDivisionId,
         ];
 
         return view('dashboard/tasks/index', $data);
+    }
+
+    /**
+     * Tambah Program Kerja (Proker) Baru — Khusus Admin BPH & Kadiv
+     */
+    public function storeProgram()
+    {
+        $userRole       = session()->get('user_role');
+        $userDivisionId = session()->get('user_division_id');
+        $userId         = session()->get('user_id');
+
+        if (!in_array($userRole, ['admin', 'kadiv'], true)) {
+            return redirect()->back()->with('error', 'Hanya Admin BPH atau Kepala Divisi yang dapat membuat program kerja.');
+        }
+
+        $rules = [
+            'title'       => 'required|min_length[3]|max_length[255]',
+            'period_year' => 'required|exact_length[4]|numeric',
+        ];
+
+        if ($userRole === 'admin') {
+            $rules['division_id'] = 'required|is_natural_no_zero';
+        }
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $divisionId = ($userRole === 'admin')
+            ? (int) $this->request->getPost('division_id')
+            : (int) $userDivisionId;
+
+        $data = [
+            'title'       => trim($this->request->getPost('title')),
+            'description' => trim($this->request->getPost('description') ?? ''),
+            'division_id' => $divisionId,
+            'period_year' => (int) $this->request->getPost('period_year'),
+            'period_term' => 1,
+            'start_date'  => $this->request->getPost('start_date') ?: null,
+            'end_date'    => $this->request->getPost('end_date') ?: null,
+            'status'      => 'active',
+            'progress'    => 0,
+            'created_by'  => $userId,
+        ];
+
+        $this->programModel->insert($data);
+        $newProgramId = $this->programModel->getInsertID();
+
+        return redirect()->to(site_url('dashboard/tasks?program_id=' . $newProgramId))->with('success', 'Program Kerja baru berhasil dibuat! Anda sekarang dapat menambahkan tugas tim di papan Kanban.');
     }
 
     public function store()

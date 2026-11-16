@@ -14,6 +14,24 @@
         <p class="text-xs sm:text-sm text-slate-100 mt-2 leading-relaxed">
             Anda masuk sebagai <strong class="uppercase text-amber-300 font-black"><?= esc(session()->get('user_role')) ?></strong> pada <strong class="text-white"><?= esc(session()->get('user_division_name')) ?></strong>. Pantau perkembangan proker dan selesaikan tugas tim Anda hari ini.
         </p>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap items-center gap-3 mt-5">
+            <a href="<?= site_url('dashboard/tasks?action=new_task') ?>" class="px-4 py-2.5 rounded-xl bg-white text-brand-700 hover:bg-slate-100 font-bold text-xs shadow-md shadow-black/10 transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-plus text-brand-600"></i>
+                <span>Tambah Tugas Baru</span>
+            </a>
+            <?php if (in_array(session()->get('user_role'), ['admin', 'kadiv'], true)): ?>
+                <a href="<?= site_url('dashboard/tasks?action=new_program') ?>" class="px-4 py-2.5 rounded-xl bg-slate-900/40 hover:bg-slate-900/60 border border-white/20 text-white font-bold text-xs backdrop-blur transition inline-flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-amber-300"></i>
+                    <span>Program Kerja Baru</span>
+                </a>
+            <?php endif; ?>
+            <a href="<?= site_url('dashboard/tasks') ?>" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Papan Kanban</span>
+            </a>
+        </div>
     </div>
 </div>
 
@@ -63,6 +81,18 @@
                     <h2 class="text-base font-bold text-slate-900">Program Kerja (Monitoring Progres)</h2>
                     <p class="text-xs text-slate-500">Status dan kemajuan pelaksanaan proker</p>
                 </div>
+                <div class="flex items-center gap-2">
+                    <?php if (in_array(session()->get('user_role'), ['admin', 'kadiv'], true)): ?>
+                        <a href="<?= site_url('dashboard/tasks?action=new_program') ?>" class="px-3 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Proker Baru</span>
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?= site_url('dashboard/tasks') ?>" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check text-[10px]"></i>
+                        <span>Buka Kanban</span>
+                    </a>
+                </div>
             </div>
 
             <div class="space-y-4">
@@ -107,6 +137,10 @@
                     <h2 class="text-base font-bold text-slate-900">Daftar Tugas Saya</h2>
                     <p class="text-xs text-slate-500">To-do list aktif Anda</p>
                 </div>
+                <a href="<?= site_url('dashboard/tasks?action=new_task') ?>" class="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Tambah Tugas</span>
+                </a>
             </div>
 
             <div class="space-y-3">

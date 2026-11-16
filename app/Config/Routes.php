@@ -46,6 +46,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
     $routes->group('tasks', function ($routes) {
         $routes->get('/', 'TaskController::index');
         $routes->post('store', 'TaskController::store');
+        $routes->post('program/store', 'TaskController::storeProgram');
         $routes->post('update-status', 'TaskController::updateStatus');
         $routes->post('add-log', 'TaskController::addProgressLog');
     });
