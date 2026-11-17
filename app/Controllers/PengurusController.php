@@ -81,7 +81,7 @@ class PengurusController extends BaseController
     {
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]',
-            'nim'         => 'required|min_length[4]|max_length[20]|is_unique[hmt_users.nim]',
+            'nim'         => 'required|min_length[4]|max_length[20]',
             'email'       => 'required|valid_email|is_unique[hmt_users.email]',
             'password'    => 'required|min_length[6]',
             'role'        => 'required|in_list[admin,kadiv,staff]',
@@ -118,7 +118,7 @@ class PengurusController extends BaseController
 
         $rules = [
             'name'        => 'required|min_length[3]|max_length[100]',
-            'nim'         => "required|min_length[4]|max_length[20]|is_unique[hmt_users.nim,id,{$id}]",
+            'nim'         => "required|min_length[4]|max_length[20]",
             'email'       => "required|valid_email|is_unique[hmt_users.email,id,{$id}]",
             'role'        => 'required|in_list[admin,kadiv,staff]',
             'division_id' => 'permit_empty|is_natural_no_zero',

@@ -92,7 +92,7 @@
                     <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Pengurus / NIM</label>
                     <div class="relative">
                         <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" name="login_id" id="login_id" required value="<?= old('login_id') ?>" placeholder="admin@himatika.org / 22010001" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        <input type="text" name="login_id" id="login_id" required value="<?= old('login_id') ?>" placeholder="admin@himatika.org / 240401000000" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
                     </div>
                 </div>
 

@@ -60,7 +60,7 @@ CREATE TABLE `hmt_users` (
   `updated_at` datetime DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `nim` (`nim`),
+  KEY `nim` (`nim`),
   UNIQUE KEY `email` (`email`),
   KEY `division_id` (`division_id`),
   CONSTRAINT `fk_users_division` FOREIGN KEY (`division_id`) REFERENCES `hmt_divisions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -70,27 +70,27 @@ CREATE TABLE `hmt_users` (
 -- Dumping data for table: hmt_users (21 Anggota Resmi HIMATIKA)
 -- --------------------------------------------------------
 INSERT INTO `hmt_users` (`id`, `name`, `nim`, `email`, `password`, `avatar`, `role`, `division_id`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Rabiah Aladawiyah', '22010001', 'rabiah@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'admin', NULL, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(2, 'Samuel Binsar Aditya Simamora', '22010002', 'samuel@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'admin', NULL, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(3, 'Vina Lestari', '22010003', 'vina@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', NULL, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(4, 'Nadin Nadilah', '22010004', 'nadin@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', NULL, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(5, 'Dian Avila', '22010005', 'dian@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', NULL, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(6, 'M. Rendy Amril', '22010006', 'rendy@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 1, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(7, 'Hikmah Indriyani', '22010007', 'hikmah@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 1, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(8, 'M. Naufal Adzim Ramadhan', '22010008', 'naufal@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 1, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(9, 'Linawati', '22010009', 'linawati@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 1, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(10, 'Intan Puji Hirdian', '22010010', 'intan@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 2, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(11, 'Ratu Balqis Mantika', '22010011', 'balqis@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 2, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(12, 'Triyas Apritantina', '22010012', 'triyas@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 2, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(13, 'Cut Evelyn Anwar', '22010013', 'cut.evelyn@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 3, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(14, 'Arsita Rahmawati Dewi', '22010014', 'arsita@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(15, 'M. Dzaky Ghaly Ramdhani', '22010015', 'dzaky@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(16, 'Johan Sudanta Hla', '22010016', 'johan@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(17, 'Risma Diah Wulandari', '22010017', 'risma@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(18, 'Raden Dimas Taufik Rahmat', '22010018', 'dimas@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 4, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(19, 'Fajar Mauludin', '22010019', 'fajar@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 4, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(20, 'Mochammad Wahyu R', '22010020', 'wahyu@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 4, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL),
-(21, 'Chandra Handika', '22010021', 'chandra@himatika.org', '$2y$10$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 4, 1, '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL);
+(1, 'Rabiah Aladawiyah', '240401000000', 'rabiah@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'admin', NULL, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(2, 'Samuel Binsar Aditya Simamora', '240401000000', 'samuel@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'admin', NULL, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(3, 'Vina Lestari', '240401000000', 'vina@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', NULL, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(4, 'Nadin Nadilah', '260401071001', 'nadin@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', NULL, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(5, 'Dian Avila', '250401010377', 'dian@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', NULL, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(6, 'M. Rendy Amril', '240401010288', 'rendy@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 1, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(7, 'Hikmah Indriyani', '250401010395', 'hikmah@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 1, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(8, 'M. Naufal Adzim Ramadhan', '260401630042', 'naufal@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 1, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(9, 'Linawati', '260401010228', 'linawati@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 1, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(10, 'Intan Puji Hirdian', '250401010210', 'intan@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 2, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(11, 'Ratu Bilqis Mantika', '240401020203', 'balqis@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 2, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(12, 'Triyas Apritantina', '260401010208', 'triyas@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 2, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(13, 'Cut Evelyn Anwar', '250401010442', 'cut.evelyn@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 3, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(14, 'Arsita Rahmawati Dewi', '240401010318', 'arsita@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(15, 'M. Dzaky Ghaly Ramdhani', '260401010316', 'dzaky@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(16, 'Johan Sudanta Hla', '260401630027', 'johan@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(17, 'Risma Diah Wulandari', '260401010315', 'risma@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 3, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(18, 'Raden Dimas Taufik Rahmat', '250401010460', 'dimas@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'kadiv', 4, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(19, 'Fajar Mauludin', '260401010227', 'fajar@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 4, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(20, 'Mochammad Wahyu R', '260401630016', 'wahyu@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 4, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL),
+(21, 'Chandra Handika', '260401010340', 'chandra@himatika.org', 'y$x0WzAgx8Ou/yx4vt/yhLFex9VHK/LseqTAUd4feC7Y4RgB6YDeUvC', NULL, 'staff', 4, 1, '2026-11-17 02:26:00', '2026-11-17 02:26:00', NULL);
 
 -- Add foreign key back to divisions for head_user_id
 ALTER TABLE `hmt_divisions`

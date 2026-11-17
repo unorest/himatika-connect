@@ -23,12 +23,21 @@ class UserSeeder extends Seeder
         $psdmId      = $divMap['pdsm'] ?? ($divMap['psdm'] ?? null);
         $intellogyId = $divMap['intellogy'] ?? null;
 
+        // Drop UNIQUE constraint on nim if present to allow duplicate dummy NIMs
+        try {
+            $this->db->query("ALTER TABLE `hmt_users` DROP INDEX `nim`");
+        } catch (\Throwable $e) {}
+
+        try {
+            $this->db->query("ALTER TABLE `hmt_users` ADD INDEX `idx_nim` (`nim`)");
+        } catch (\Throwable $e) {}
+
         $members = [
             // BPH (Badan Pengurus Harian)
             [
                 'id'          => 1,
                 'name'        => 'Rabiah Aladawiyah',
-                'nim'         => '22010001',
+                'nim'         => '240401000000',
                 'email'       => 'rabiah@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'admin', // Super Admin (Ketua)
@@ -40,7 +49,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 2,
                 'name'        => 'Samuel Binsar Aditya Simamora',
-                'nim'         => '22010002',
+                'nim'         => '240401000000',
                 'email'       => 'samuel@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'admin', // Super Admin (Wakil Ketua)
@@ -52,7 +61,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 3,
                 'name'        => 'Vina Lestari',
-                'nim'         => '22010003',
+                'nim'         => '240401000000',
                 'email'       => 'vina@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota (Sekretaris 1)
@@ -64,7 +73,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 4,
                 'name'        => 'Nadin Nadilah',
-                'nim'         => '22010004',
+                'nim'         => '260401071001',
                 'email'       => 'nadin@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota (Sekretaris 2)
@@ -76,7 +85,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 5,
                 'name'        => 'Dian Avila',
-                'nim'         => '22010005',
+                'nim'         => '250401010377',
                 'email'       => 'dian@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota (Bendahara)
@@ -90,7 +99,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 6,
                 'name'        => 'M. Rendy Amril',
-                'nim'         => '22010006',
+                'nim'         => '240401010288',
                 'email'       => 'rendy@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'kadiv', // Kepala Divisi Stupport
@@ -102,7 +111,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 7,
                 'name'        => 'Hikmah Indriyani',
-                'nim'         => '23010007',
+                'nim'         => '250401010395',
                 'email'       => 'hikmah@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota Stupport
@@ -114,7 +123,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 8,
                 'name'        => 'M. Naufal Adzim Ramadhan',
-                'nim'         => '23010008',
+                'nim'         => '260401630042',
                 'email'       => 'naufal@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota Stupport
@@ -126,7 +135,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 9,
                 'name'        => 'Linawati',
-                'nim'         => '23010009',
+                'nim'         => '260401010228',
                 'email'       => 'linawati@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota Stupport
@@ -140,7 +149,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 10,
                 'name'        => 'Intan Puji Hirdian',
-                'nim'         => '22010010',
+                'nim'         => '250401010210',
                 'email'       => 'intan@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'kadiv', // Kepala Divisi PDD
@@ -151,8 +160,8 @@ class UserSeeder extends Seeder
             ],
             [
                 'id'          => 11,
-                'name'        => 'Ratu Balqis Mantika',
-                'nim'         => '23010011',
+                'name'        => 'Ratu Bilqis Mantika',
+                'nim'         => '240401020203',
                 'email'       => 'balqis@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota PDD
@@ -164,7 +173,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 12,
                 'name'        => 'Triyas Apritantina',
-                'nim'         => '23010012',
+                'nim'         => '260401010208',
                 'email'       => 'triyas@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota PDD
@@ -178,8 +187,8 @@ class UserSeeder extends Seeder
             [
                 'id'          => 13,
                 'name'        => 'Cut Evelyn Anwar',
-                'nim'         => '22010013',
-                'email'       => 'evelyn@himatika.org',
+                'nim'         => '250401010442',
+                'email'       => 'cut.evelyn@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'kadiv', // Kepala Divisi PSDM
                 'division_id' => $psdmId,
@@ -190,7 +199,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 14,
                 'name'        => 'Arsita Rahmawati Dewi',
-                'nim'         => '23010014',
+                'nim'         => '240401010318',
                 'email'       => 'arsita@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota PSDM
@@ -202,7 +211,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 15,
                 'name'        => 'M. Dzaky Ghaly Ramdhani',
-                'nim'         => '23010015',
+                'nim'         => '260401010316',
                 'email'       => 'dzaky@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota PSDM
@@ -214,7 +223,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 16,
                 'name'        => 'Johan Sudanta Hla',
-                'nim'         => '23010016',
+                'nim'         => '260401630027',
                 'email'       => 'johan@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota PSDM
@@ -226,7 +235,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 17,
                 'name'        => 'Risma Diah Wulandari',
-                'nim'         => '23010017',
+                'nim'         => '260401010315',
                 'email'       => 'risma@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota PSDM
@@ -240,7 +249,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 18,
                 'name'        => 'Raden Dimas Taufik Rahmat',
-                'nim'         => '22010018',
+                'nim'         => '250401010460',
                 'email'       => 'dimas@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'kadiv', // Kepala Divisi Intellogy
@@ -252,7 +261,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 19,
                 'name'        => 'Fajar Mauludin',
-                'nim'         => '23010019',
+                'nim'         => '260401010227',
                 'email'       => 'fajar@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota Intellogy
@@ -264,7 +273,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 20,
                 'name'        => 'Mochammad Wahyu R',
-                'nim'         => '23010020',
+                'nim'         => '260401630016',
                 'email'       => 'wahyu@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota Intellogy
@@ -276,7 +285,7 @@ class UserSeeder extends Seeder
             [
                 'id'          => 21,
                 'name'        => 'Chandra Handika',
-                'nim'         => '23010021',
+                'nim'         => '260401010340',
                 'email'       => 'chandra@himatika.org',
                 'password'    => $defaultPassword,
                 'role'        => 'staff', // Anggota Intellogy
@@ -288,10 +297,22 @@ class UserSeeder extends Seeder
         ];
 
         $this->db->disableForeignKeyChecks();
-        $this->db->table('hmt_users')->truncate();
-        $this->db->table('hmt_users')->insertBatch($members);
 
-        // Update head_user_id di hmt_divisions
+        foreach ($members as $member) {
+            $existing = $this->db->table('hmt_users')
+                                 ->where('id', $member['id'])
+                                 ->orWhere('email', $member['email'])
+                                 ->get()
+                                 ->getRowArray();
+
+            if ($existing) {
+                $this->db->table('hmt_users')->where('id', $existing['id'])->update($member);
+            } else {
+                $this->db->table('hmt_users')->insert($member);
+            }
+        }
+
+        // Sinkronisasi Kepala Divisi (head_user_id)
         if ($stupportId) {
             $this->db->table('hmt_divisions')->where('id', $stupportId)->update(['head_user_id' => 6]);
         }
@@ -307,6 +328,6 @@ class UserSeeder extends Seeder
 
         $this->db->enableForeignKeyChecks();
 
-        echo "✅ UserSeeder: 21 anggota & pimpinan resmi HIMATIKA berhasil ditambahkan.\n";
+        echo "✅ UserSeeder: 21 anggota & pengurus HIMATIKA berhasil diperbarui.\n";
     }
 }
