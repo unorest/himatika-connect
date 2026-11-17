@@ -92,6 +92,22 @@ class Forum extends BaseController
         ];
 
         $this->forumModel->insert($data);
+        $insertId = $this->forumModel->getInsertID();
+
+        // Ambil nama kategori jika ada untuk notifikasi WA
+        $categoryName = 'Umum';
+        if (!empty($data['category_id'])) {
+            $cat = $this->categoryModel->find($data['category_id']);
+            if ($cat) {
+                $categoryName = $cat['name'];
+            }
+        }
+
+        $data['id']            = $insertId;
+        $data['category_name'] = $categoryName;
+
+        // Kirim Notifikasi WhatsApp Otomatis ke Pengurus (Non-blocking / Aman)
+        \App\Libraries\WhatsAppService::sendAspirationAlert($data);
 
         return redirect()->to(site_url('forum'))->with('success', 'Aspirasi / pertanyaanmu berhasil dikirim! Menunggu kurasi & verifikasi dari divisi terkait.');
     }

@@ -64,6 +64,9 @@ class ModerasiQAController extends BaseController
 
         $categories = $this->categoryModel->getByType('forum');
 
+        $whatsappEnabled = filter_var(env('whatsapp.enabled', false), FILTER_VALIDATE_BOOLEAN) && !empty(env('whatsapp.token'));
+        $whatsappTarget  = env('whatsapp.target', '');
+
         $data = [
             'title'            => 'Moderasi Aspirasi & Q&A — HIMATIKA Hub',
             'questions'        => $questions,
@@ -72,9 +75,30 @@ class ModerasiQAController extends BaseController
             'categories'       => $categories,
             'selectedCategory' => $categoryId,
             'searchQuery'      => $search,
+            'whatsappEnabled'  => $whatsappEnabled,
+            'whatsappTarget'   => $whatsappTarget,
         ];
 
         return view('dashboard/moderasi_qa/index', $data);
+    }
+
+    /**
+     * Uji Kirim Notifikasi WhatsApp dari Dashboard
+     */
+    public function testWhatsApp()
+    {
+        $target = trim($this->request->getPost('target') ?: env('whatsapp.target', ''));
+        if (empty($target)) {
+            return redirect()->back()->with('error', 'Target nomor WhatsApp belum diisi di form atau di file .env.');
+        }
+
+        $res = \App\Libraries\WhatsAppService::testMessage($target);
+
+        if ($res['status'] === 'success') {
+            return redirect()->back()->with('success', 'Pesan uji coba WhatsApp berhasil dikirim ke: ' . esc($target) . '!');
+        }
+
+        return redirect()->back()->with('error', 'Gagal mengirim pesan WhatsApp: ' . esc($res['message'] ?? 'Periksa token Anda.'));
     }
 
     public function detail($id)

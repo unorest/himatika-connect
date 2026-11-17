@@ -8,6 +8,23 @@
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5">Moderasi Forum Aspirasi & Q&A</h1>
         <p class="text-xs text-slate-500 mt-1">Kelola, verifikasi, dan berikan tanggapan resmi atas pertanyaan mahasiswa umum</p>
     </div>
+
+    <!-- WhatsApp Notification Status Badge & Test -->
+    <div class="flex items-center gap-2">
+        <?php if ($whatsappEnabled): ?>
+            <button type="button" onclick="openTestWaModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm transition" title="Notifikasi otomatis aktif ke: <?= esc($whatsappTarget) ?>">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
+                <span>WA Notif: Aktif</span>
+            </button>
+        <?php else: ?>
+            <button type="button" onclick="openTestWaModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-sm transition" title="Klik untuk panduan aktivasi WhatsApp">
+                <i class="fa-brands fa-whatsapp text-slate-400 text-base"></i>
+                <span>WA Notif: Belum Aktif</span>
+                <i class="fa-solid fa-circle-info text-[11px] text-slate-400"></i>
+            </button>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Status Tabs & Filter -->
@@ -166,5 +183,80 @@
         </div>
     <?php endif; ?>
 </div>
+
+<!-- Modal Panduan & Uji Kirim WhatsApp Notifikasi -->
+<div id="testWaModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-in fade-in duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-sm">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Notifikasi WhatsApp Aspirasi</h3>
+                    <p class="text-xs text-slate-500">Integrasi pesan instan ke nomor pengurus / grup</p>
+                </div>
+            </div>
+            <button onclick="closeTestWaModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4 text-xs">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="font-bold text-slate-700">Status Gateway Fonnte:</span>
+                    <?php if ($whatsappEnabled): ?>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Aktif & Siap Kirim</span>
+                    <?php else: ?>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Menunggu Token .env</span>
+                    <?php endif; ?>
+                </div>
+                <div class="text-[11px] text-slate-500">
+                    Target Nomor / Grup: <code class="font-mono bg-white px-1.5 py-0.5 rounded border text-slate-700"><?= esc($whatsappTarget ?: 'Belum diisi di .env') ?></code>
+                </div>
+            </div>
+
+            <!-- Form Uji Coba Kirim Pesan -->
+            <form action="<?= site_url('dashboard/moderasi-qa/test-wa') ?>" method="post" class="space-y-3 pt-1">
+                <?= csrf_field() ?>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kirim Pesan Uji Coba ke Nomor:</label>
+                    <input type="text" name="target" value="<?= esc($whatsappTarget) ?>" placeholder="Contoh: 081234567890" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <p class="text-[11px] text-slate-400 mt-1">Format nomor lokal (08xx) atau internasional (628xx).</p>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeTestWaModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Tutup</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                        <span>Uji Kirim Pesan</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Petunjuk Aktivasi .env -->
+            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] space-y-1">
+                <span class="font-bold flex items-center gap-1.5 text-amber-800">
+                    <i class="fa-solid fa-lightbulb"></i> Cara Mengaktifkan:
+                </span>
+                <p>1. Daftar akun di <a href="https://fonnte.com" target="_blank" class="underline font-bold text-amber-900">fonnte.com</a> & scan QR WhatsApp.</p>
+                <p>2. Buka file <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono">.env</code> dan isi token serta nomor tujuan:</p>
+                <pre class="bg-white/80 p-2 rounded border border-amber-200 font-mono text-[10px] text-slate-700 mt-1 select-all">whatsapp.enabled = true
+whatsapp.token = "TOKEN_DARI_FONNTE"
+whatsapp.target = "081234567890"</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTestWaModal() {
+        document.getElementById('testWaModal').classList.remove('hidden');
+    }
+    function closeTestWaModal() {
+        document.getElementById('testWaModal').classList.add('hidden');
+    }
+</script>
 
 <?= $this->endSection() ?>
