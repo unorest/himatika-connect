@@ -99,7 +99,10 @@
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-xs font-bold text-slate-300">Kata Sandi</label>
-                        <span class="text-[11px] text-slate-500">Default: password123</span>
+                        <a href="<?= site_url('forgot-password') ?>" class="text-[11px] font-semibold text-brand-400 hover:text-brand-300 transition flex items-center gap-1">
+                            <i class="fa-solid fa-key text-[10px]"></i>
+                            <span>Lupa kata sandi?</span>
+                        </a>
                     </div>
                     <div class="relative">
                         <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>

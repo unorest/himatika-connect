@@ -97,4 +97,89 @@ class Auth extends BaseController
         session()->destroy();
         return redirect()->to(site_url('login'))->with('success', 'Anda telah berhasil keluar.');
     }
+
+    /**
+     * Halaman Formulir Lupa Kata Sandi
+     */
+    public function forgotPassword()
+    {
+        if (session()->get('is_logged_in')) {
+            return redirect()->to(site_url('dashboard'));
+        }
+
+        $data = [
+            'title' => 'Lupa Kata Sandi — HIMATIKA Hub',
+        ];
+
+        return view('auth/forgot_password', $data);
+    }
+
+    /**
+     * Proses Verifikasi Identitas & Reset Kata Sandi Baru
+     */
+    public function attemptResetPassword()
+    {
+        $rules = [
+            'email' => [
+                'label'  => 'Email Akun',
+                'rules'  => 'required|valid_email',
+                'errors' => [
+                    'required'    => 'Email wajib diisi.',
+                    'valid_email' => 'Format email tidak valid.',
+                ],
+            ],
+            'nim' => [
+                'label'  => 'NIM',
+                'rules'  => 'required',
+                'errors' => [
+                    'required' => 'NIM wajib diisi untuk verifikasi identitas pengurus.',
+                ],
+            ],
+            'new_password' => [
+                'label'  => 'Kata Sandi Baru',
+                'rules'  => 'required|min_length[6]',
+                'errors' => [
+                    'required'   => 'Kata sandi baru wajib diisi.',
+                    'min_length' => 'Kata sandi baru minimal 6 karakter.',
+                ],
+            ],
+            'confirm_password' => [
+                'label'  => 'Konfirmasi Kata Sandi',
+                'rules'  => 'required|matches[new_password]',
+                'errors' => [
+                    'required' => 'Konfirmasi kata sandi wajib diisi.',
+                    'matches'  => 'Konfirmasi kata sandi tidak cocok dengan kata sandi baru.',
+                ],
+            ],
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $email       = strtolower(trim($this->request->getPost('email')));
+        $nim         = trim($this->request->getPost('nim'));
+        $newPassword = $this->request->getPost('new_password');
+
+        $user = $this->userModel->where('email', $email)
+                                ->where('nim', $nim)
+                                ->where('deleted_at', null)
+                                ->first();
+
+        if (!$user) {
+            return redirect()->back()->withInput()->with('error', 'Kombinasi Email dan NIM tidak cocok dengan data pengurus manapun. Periksa kembali atau hubungi BPH.');
+        }
+
+        if (!$user['is_active']) {
+            return redirect()->back()->with('error', 'Akun Anda sedang dinonaktifkan oleh administrator. Silakan hubungi BPH.');
+        }
+
+        // Update password baru ke database
+        $this->userModel->update($user['id'], [
+            'password'   => password_hash($newPassword, PASSWORD_BCRYPT),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->to(site_url('login'))->with('success', 'Kata sandi akun ' . esc($user['name']) . ' berhasil direset! Silakan login menggunakan kata sandi baru Anda.');
+    }
 }

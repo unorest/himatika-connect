@@ -35,6 +35,8 @@ $routes->group('sertifikat', function ($routes) {
 // Autentikasi Pengurus
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
+$routes->get('forgot-password', 'Auth::forgotPassword');
+$routes->post('forgot-password', 'Auth::attemptResetPassword');
 $routes->get('logout', 'Auth::logout');
 $routes->post('logout', 'Auth::logout');
 
