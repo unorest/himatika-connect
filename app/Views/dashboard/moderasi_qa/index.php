@@ -184,67 +184,162 @@
     <?php endif; ?>
 </div>
 
-<!-- Modal Panduan & Uji Kirim WhatsApp Notifikasi -->
+<!-- Modal Panduan, Pengaturan & Uji Kirim WhatsApp Notifikasi -->
 <div id="testWaModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-in fade-in duration-200">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-sm">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-sm border border-emerald-100">
                     <i class="fa-brands fa-whatsapp"></i>
                 </div>
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Notifikasi WhatsApp Aspirasi</h3>
-                    <p class="text-xs text-slate-500">Integrasi pesan instan ke nomor pengurus / grup</p>
+                    <p class="text-xs text-slate-500">Kirim pemberitahuan instan setiap ada aspirasi baru</p>
                 </div>
             </div>
-            <button onclick="closeTestWaModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+            <button onclick="closeTestWaModal()" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <div class="space-y-4 text-xs">
-            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="font-bold text-slate-700">Status Gateway Fonnte:</span>
-                    <?php if ($whatsappEnabled): ?>
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Aktif & Siap Kirim</span>
-                    <?php else: ?>
-                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Menunggu Token .env</span>
-                    <?php endif; ?>
-                </div>
-                <div class="text-[11px] text-slate-500">
-                    Target Nomor / Grup: <code class="font-mono bg-white px-1.5 py-0.5 rounded border text-slate-700"><?= esc($whatsappTarget ?: 'Belum diisi di .env') ?></code>
-                </div>
+        <!-- Status Overview Card -->
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5 text-xs">
+            <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-700">Status Notifikasi:</span>
+                <?php if ($whatsappEnabled): ?>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                        Aktif & Siap Kirim
+                    </span>
+                <?php else: ?>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
+                        <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                        Belum Aktif / Token Kosong
+                    </span>
+                <?php endif; ?>
             </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/60">
+                <span>Target Tersimpan:</span>
+                <code class="font-mono bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-700 font-bold">
+                    <?= esc($whatsappTarget ?: 'Belum diatur') ?>
+                </code>
+            </div>
+        </div>
 
-            <!-- Form Uji Coba Kirim Pesan -->
-            <form action="<?= site_url('dashboard/moderasi-qa/test-wa') ?>" method="post" class="space-y-3 pt-1">
+        <!-- Tab Switcher -->
+        <div class="flex items-center gap-2 border-b border-slate-100 pb-3 text-xs font-bold">
+            <button type="button" id="tabBtnSettings" onclick="switchWaTab('settings')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-gear"></i>
+                <span>Pengaturan & Token</span>
+            </button>
+            <button type="button" id="tabBtnTest" onclick="switchWaTab('test')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Uji Coba Kirim (Test)</span>
+            </button>
+            <button type="button" id="tabBtnGuide" onclick="switchWaTab('guide')" class="px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-book-open"></i>
+                <span>Panduan Fonnte</span>
+            </button>
+        </div>
+
+        <!-- Tab 1: Pengaturan WhatsApp Langsung dari Web -->
+        <div id="waTabSettings" class="space-y-4">
+            <form action="<?= site_url('dashboard/moderasi-qa/save-wa-settings') ?>" method="post" class="space-y-3.5 text-xs">
                 <?= csrf_field() ?>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Kirim Pesan Uji Coba ke Nomor:</label>
-                    <input type="text" name="target" value="<?= esc($whatsappTarget) ?>" placeholder="Contoh: 081234567890" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <p class="text-[11px] text-slate-400 mt-1">Format nomor lokal (08xx) atau internasional (628xx).</p>
+
+                <div class="p-3.5 rounded-xl bg-brand-50/60 border border-brand-100 flex items-start gap-3">
+                    <input type="checkbox" id="whatsapp_enabled" name="whatsapp_enabled" value="1" <?= (!empty($waSettings['enabled'])) ? 'checked' : '' ?> class="mt-0.5 rounded text-brand-600 focus:ring-brand-500 w-4 h-4 cursor-pointer">
+                    <label for="whatsapp_enabled" class="text-slate-700 cursor-pointer">
+                        <span class="font-bold text-slate-900 block">Aktifkan Notifikasi WhatsApp Otomatis</span>
+                        <span class="text-slate-500 text-[11px]">Kirim pesan WhatsApp otomatis ke pengurus setiap ada aspirasi baru yang dikirim mahasiswa.</span>
+                    </label>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeTestWaModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Tutup</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
-                        <span>Uji Kirim Pesan</span>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">
+                        Token API Fonnte:
+                        <span class="text-rose-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="wa_token_input" name="whatsapp_token" value="<?= esc($waSettings['token'] ?? '') ?>" placeholder="Paste token perangkat dari fonnte.com" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <button type="button" onclick="toggleTokenVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                            <i id="wa_token_eye" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Dapatkan token dengan mendaftar di <a href="https://fonnte.com" target="_blank" class="text-brand-600 underline font-semibold">fonnte.com</a> & scan QR.</p>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">
+                        Target Nomor / ID Grup:
+                        <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" name="whatsapp_target" value="<?= esc($waSettings['target'] ?? '') ?>" placeholder="Contoh: 081234567890 atau 1203630xxx@g.us" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <p class="text-[11px] text-slate-400 mt-1">Bisa lebih dari 1 nomor dengan dipisah tanda koma (contoh: <code>081234...,089876...</code>).</p>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeTestWaModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Pengaturan</span>
                     </button>
                 </div>
             </form>
+        </div>
 
-            <!-- Petunjuk Aktivasi .env -->
-            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] space-y-1">
-                <span class="font-bold flex items-center gap-1.5 text-amber-800">
-                    <i class="fa-solid fa-lightbulb"></i> Cara Mengaktifkan:
-                </span>
-                <p>1. Daftar akun di <a href="https://fonnte.com" target="_blank" class="underline font-bold text-amber-900">fonnte.com</a> & scan QR WhatsApp.</p>
-                <p>2. Buka file <code class="bg-amber-100/80 px-1 py-0.5 rounded font-mono">.env</code> dan isi token serta nomor tujuan:</p>
-                <pre class="bg-white/80 p-2 rounded border border-amber-200 font-mono text-[10px] text-slate-700 mt-1 select-all">whatsapp.enabled = true
-whatsapp.token = "TOKEN_DARI_FONNTE"
-whatsapp.target = "081234567890"</pre>
+        <!-- Tab 2: Uji Coba Kirim Langsung -->
+        <div id="waTabTest" class="space-y-4 hidden text-xs">
+            <form action="<?= site_url('dashboard/moderasi-qa/test-wa') ?>" method="post" class="space-y-3.5">
+                <?= csrf_field() ?>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[11px] space-y-1">
+                    <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-brand-600"></i> Cara Mengetes:
+                    </span>
+                    <p>Masukkan nomor WhatsApp Anda di bawah ini, lalu klik tombol Uji Kirim. Sistem akan langsung mengirim pesan pengujian via gateway Fonnte.</p>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Nomor WhatsApp Pengujian:</label>
+                    <input type="text" name="target" value="<?= esc($whatsappTarget) ?>" placeholder="Contoh: 081234567890" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Token Fonnte (Opsional untuk uji coba langsung):</label>
+                    <input type="text" name="token" value="<?= esc($waSettings['token'] ?? '') ?>" placeholder="Kosongkan jika ingin memakai token tersimpan" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeTestWaModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Tutup</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                        <span>Kirim Pesan Uji Coba Sekarang</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tab 3: Panduan Lengkap -->
+        <div id="waTabGuide" class="space-y-3.5 hidden text-xs">
+            <div class="space-y-2.5 p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-amber-950">
+                <div class="font-bold text-amber-900 flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-lightbulb text-amber-600"></i>
+                    <span>3 Langkah Menghubungkan WhatsApp (Fonnte):</span>
+                </div>
+                <ol class="list-decimal list-inside space-y-2 text-[11px] leading-relaxed pt-1 text-slate-700">
+                    <li>Buka situs <a href="https://fonnte.com" target="_blank" class="text-brand-600 font-bold underline">fonnte.com</a> dan buat akun baru gratis.</li>
+                    <li>Di halaman <strong>Dashboard Fonnte</strong>, klik <strong>Tambah Perangkat (Add Device)</strong>.</li>
+                    <li>Klik <strong>Scan QR</strong>, lalu buka WhatsApp di ponsel pengurus > klik <em>Perangkat Tertaut (Linked Devices)</em> > Scan QR tersebut sampai status menjadi <strong>Connect</strong>.</li>
+                    <li>Salin <strong>Token</strong> yang tertera pada perangkat tersebut, lalu paste pada tab <strong>Pengaturan & Token</strong> di atas, lalu klik <strong>Simpan</strong>.</li>
+                </ol>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[11px]">
+                <span class="font-bold text-slate-800 block mb-1">💡 Alternatif via file <code>.env</code> (untuk Server/Codespaces):</span>
+                <pre class="bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[10px] text-slate-700 overflow-x-auto select-all">whatsapp.enabled = true
+whatsapp.token   = "TOKEN_DARI_FONNTE"
+whatsapp.target  = "081234567890"</pre>
             </div>
         </div>
     </div>
@@ -256,6 +351,33 @@ whatsapp.target = "081234567890"</pre>
     }
     function closeTestWaModal() {
         document.getElementById('testWaModal').classList.add('hidden');
+    }
+
+    function switchWaTab(tab) {
+        const tabs = ['settings', 'test', 'guide'];
+        tabs.forEach(t => {
+            const el = document.getElementById('waTab' + t.charAt(0).toUpperCase() + t.slice(1));
+            const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+            if (t === tab) {
+                el.classList.remove('hidden');
+                btn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-900 text-white transition flex items-center gap-1.5';
+            } else {
+                el.classList.add('hidden');
+                btn.className = 'px-3.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition flex items-center gap-1.5';
+            }
+        });
+    }
+
+    function toggleTokenVisibility() {
+        const input = document.getElementById('wa_token_input');
+        const eye = document.getElementById('wa_token_eye');
+        if (input.type === 'password') {
+            input.type = 'text';
+            eye.className = 'fa-solid fa-eye-slash';
+        } else {
+            input.type = 'password';
+            eye.className = 'fa-solid fa-eye';
+        }
     }
 </script>
 

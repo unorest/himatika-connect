@@ -64,8 +64,9 @@ class ModerasiQAController extends BaseController
 
         $categories = $this->categoryModel->getByType('forum');
 
-        $whatsappEnabled = filter_var(env('whatsapp.enabled', false), FILTER_VALIDATE_BOOLEAN) && !empty(env('whatsapp.token'));
-        $whatsappTarget  = env('whatsapp.target', '');
+        $waSettings      = \App\Libraries\WhatsAppService::getSettings();
+        $whatsappEnabled = $waSettings['enabled'] && !empty($waSettings['token']);
+        $whatsappTarget  = $waSettings['target'];
 
         $data = [
             'title'            => 'Moderasi Aspirasi & Q&A — HIMATIKA Hub',
@@ -77,9 +78,24 @@ class ModerasiQAController extends BaseController
             'searchQuery'      => $search,
             'whatsappEnabled'  => $whatsappEnabled,
             'whatsappTarget'   => $whatsappTarget,
+            'waSettings'       => $waSettings,
         ];
 
         return view('dashboard/moderasi_qa/index', $data);
+    }
+
+    /**
+     * Simpan Pengaturan WhatsApp Langsung dari Dashboard
+     */
+    public function saveWhatsAppSettings()
+    {
+        $enabled = $this->request->getPost('whatsapp_enabled') === '1';
+        $token   = trim($this->request->getPost('whatsapp_token') ?? '');
+        $target  = trim($this->request->getPost('whatsapp_target') ?? '');
+
+        \App\Libraries\WhatsAppService::saveSettings($enabled, $token, $target);
+
+        return redirect()->back()->with('success', 'Pengaturan notifikasi WhatsApp berhasil disimpan!');
     }
 
     /**
@@ -87,18 +103,26 @@ class ModerasiQAController extends BaseController
      */
     public function testWhatsApp()
     {
-        $target = trim($this->request->getPost('target') ?: env('whatsapp.target', ''));
-        if (empty($target)) {
-            return redirect()->back()->with('error', 'Target nomor WhatsApp belum diisi di form atau di file .env.');
+        $waSettings = \App\Libraries\WhatsAppService::getSettings();
+        $target     = trim($this->request->getPost('target') ?: $waSettings['target']);
+        $token      = trim($this->request->getPost('token') ?: $waSettings['token']);
+
+        if (empty($token)) {
+            return redirect()->back()->with('error', 'Token WhatsApp masih kosong. Masukkan Token API Fonnte Anda terlebih dahulu.');
         }
 
-        $res = \App\Libraries\WhatsAppService::testMessage($target);
+        if (empty($target)) {
+            return redirect()->back()->with('error', 'Target nomor WhatsApp belum diisi.');
+        }
+
+        $res = \App\Libraries\WhatsAppService::testMessage($target, $token);
 
         if ($res['status'] === 'success') {
-            return redirect()->back()->with('success', 'Pesan uji coba WhatsApp berhasil dikirim ke: ' . esc($target) . '!');
+            $detail = !empty($res['detail']) ? ' (' . $res['detail'] . ')' : '';
+            return redirect()->back()->with('success', 'Pesan uji coba WhatsApp berhasil dikirim ke ' . esc($target) . $detail . '!');
         }
 
-        return redirect()->back()->with('error', 'Gagal mengirim pesan WhatsApp: ' . esc($res['message'] ?? 'Periksa token Anda.'));
+        return redirect()->back()->with('error', 'Gagal mengirim pesan WhatsApp: ' . esc($res['message'] ?? 'Periksa token atau target Anda.'));
     }
 
     public function detail($id)

@@ -5,21 +5,112 @@ namespace App\Libraries;
 class WhatsAppService
 {
     /**
+     * Dapatkan konfigurasi WhatsApp saat ini (menggabungkan file json pengaturan & .env)
+     *
+     * @return array
+     */
+    public static function getSettings(): array
+    {
+        $settingsFile = WRITEPATH . 'whatsapp_settings.json';
+        $saved = [];
+
+        if (file_exists($settingsFile)) {
+            $content = @file_get_contents($settingsFile);
+            if (!empty($content)) {
+                $saved = json_decode($content, true) ?: [];
+            }
+        }
+
+        // Nilai fallback dari .env
+        $envEnabled  = filter_var(env('whatsapp.enabled', false), FILTER_VALIDATE_BOOLEAN);
+        $envToken    = trim((string) env('whatsapp.token', ''));
+        $envTarget   = trim((string) env('whatsapp.target', ''));
+        $envProvider = trim((string) env('whatsapp.provider', 'fonnte'));
+
+        $enabled  = isset($saved['enabled']) ? (bool) $saved['enabled'] : $envEnabled;
+        $token    = !empty($saved['token']) ? trim($saved['token']) : $envToken;
+        $target   = !empty($saved['target']) ? trim($saved['target']) : $envTarget;
+        $provider = !empty($saved['provider']) ? trim($saved['provider']) : ($envProvider ?: 'fonnte');
+
+        return [
+            'enabled'  => $enabled,
+            'token'    => $token,
+            'target'   => $target,
+            'provider' => $provider,
+        ];
+    }
+
+    /**
+     * Simpan konfigurasi WhatsApp langsung dari Dashboard ke WRITEPATH
+     *
+     * @param bool $enabled
+     * @param string $token
+     * @param string $target
+     * @param string $provider
+     * @return bool
+     */
+    public static function saveSettings(bool $enabled, string $token, string $target, string $provider = 'fonnte'): bool
+    {
+        $settingsFile = WRITEPATH . 'whatsapp_settings.json';
+        $data = [
+            'enabled'    => $enabled,
+            'token'      => trim($token),
+            'target'     => self::sanitizeTarget($target),
+            'provider'   => trim($provider) ?: 'fonnte',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        return (bool) @file_put_contents($settingsFile, json_encode($data, JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * Bersihkan nomor target dari karakter tak perlu (spasi, tanda plus, strip)
+     * Tetap menjaga ID grup WhatsApp (misal xxx@g.us)
+     *
+     * @param string $target
+     * @return string
+     */
+    public static function sanitizeTarget(string $target): string
+    {
+        $parts = explode(',', $target);
+        $cleaned = [];
+
+        foreach ($parts as $part) {
+            $p = trim($part);
+            if (empty($p)) {
+                continue;
+            }
+
+            // Jika merupakan format grup WhatsApp (@g.us atau @c.us)
+            if (str_contains($p, '@g.us') || str_contains($p, '@c.us')) {
+                $cleaned[] = $p;
+                continue;
+            }
+
+            // Hapus semua selain angka
+            $digits = preg_replace('/[^0-9]/', '', $p);
+            if (!empty($digits)) {
+                $cleaned[] = $digits;
+            }
+        }
+
+        return implode(',', $cleaned);
+    }
+
+    /**
      * Kirim notifikasi WhatsApp saat ada aspirasi / pertanyaan baru masuk di forum
      *
-     * @param array $question Data pertanyaan (title, body, author_name, author_nim, category_name, id, etc.)
-     * @return array Status dan respons gateway
+     * @param array $question Data pertanyaan
+     * @return array
      */
     public static function sendAspirationAlert(array $question): array
     {
-        $enabled = filter_var(env('whatsapp.enabled', false), FILTER_VALIDATE_BOOLEAN);
-        $token   = trim(env('whatsapp.token', ''));
-        $target  = trim(env('whatsapp.target', ''));
+        $settings = self::getSettings();
 
-        if (!$enabled || empty($token) || empty($target)) {
+        if (!$settings['enabled'] || empty($settings['token']) || empty($settings['target'])) {
             return [
                 'status'  => 'skipped',
-                'message' => 'Notifikasi WhatsApp tidak diaktifkan atau konfigurasi whatsapp.token / whatsapp.target di .env belum diisi.',
+                'message' => 'Notifikasi WhatsApp tidak aktif atau token/target belum diisi.',
             ];
         }
 
@@ -50,29 +141,37 @@ class WhatsAppService
                  . "━━━━━━━━━━━━━━━━━━━━━\n"
                  . "_Pesan otomatis sistem HIMATIKA Hub_";
 
-        return self::sendMessage($target, $message, $token);
+        return self::sendMessage($settings['target'], $message, $settings['token']);
     }
 
     /**
      * Kirim pesan teks ke target nomor WhatsApp atau Group ID via Fonnte Gateway
      *
-     * @param string $target Nomor HP tujuan (misal: 08123456789 atau ID grup 1203630xxx@g.us)
+     * @param string $target Nomor HP tujuan atau Group ID
      * @param string $message Teks pesan
      * @param string|null $token Token Fonnte
      * @return array Respon hasil kirim
      */
     public static function sendMessage(string $target, string $message, ?string $token = null): array
     {
-        $token = $token ?: trim(env('whatsapp.token', ''));
+        $settings = self::getSettings();
+        $token    = !empty($token) ? trim($token) : $settings['token'];
+        $cleanTarget = self::sanitizeTarget(!empty($target) ? $target : $settings['target']);
 
-        if (empty($token) || empty($target)) {
+        if (empty($token)) {
             return [
                 'status'  => 'error',
-                'message' => 'Token atau target WhatsApp belum ditentukan.',
+                'message' => 'Token WhatsApp (Fonnte API Token) masih kosong. Silakan isi token di menu pengaturan atau file .env.',
             ];
         }
 
-        // Fonnte API mendukung multiple target dipisah koma
+        if (empty($cleanTarget)) {
+            return [
+                'status'  => 'error',
+                'message' => 'Nomor tujuan (target) WhatsApp masih kosong.',
+            ];
+        }
+
         try {
             $curl = curl_init();
 
@@ -81,12 +180,14 @@ class WhatsAppService
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
                 CURLOPT_MAXREDIRS      => 5,
-                CURLOPT_TIMEOUT        => 4, // 4 detik batas timeout agar halaman web tetap cepat
+                CURLOPT_TIMEOUT        => 12, // 12 detik timeout agar stabil di koneksi apapun
                 CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_SSL_VERIFYPEER => false, // Hindari kegagalan SSL CA bundle di environment lokal/Codespaces
+                CURLOPT_SSL_VERIFYHOST => 0,
                 CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST  => 'POST',
                 CURLOPT_POSTFIELDS     => [
-                    'target'      => $target,
+                    'target'      => $cleanTarget,
                     'message'     => $message,
                     'countryCode' => '62',
                 ],
@@ -98,20 +199,51 @@ class WhatsAppService
             $response = curl_exec($curl);
             $errNo    = curl_errno($curl);
             $errStr   = curl_error($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             curl_close($curl);
 
             if ($errNo) {
-                log_message('error', 'WhatsApp Gateway Error (' . $errNo . '): ' . $errStr);
+                log_message('error', 'WhatsApp Gateway cURL Error (' . $errNo . '): ' . $errStr);
                 return [
                     'status'  => 'error',
-                    'message' => 'Gagal koneksi ke gateway WA: ' . $errStr,
+                    'message' => 'Koneksi ke gateway gagal (cURL error ' . $errNo . '): ' . $errStr,
                 ];
             }
 
             $decoded = json_decode($response, true);
 
+            if (!is_array($decoded)) {
+                return [
+                    'status'  => 'error',
+                    'message' => 'Respons gateway tidak valid (HTTP ' . $httpCode . '): ' . mb_substr($response, 0, 200),
+                ];
+            }
+
+            // Validasi status pengiriman dari Fonnte
+            if (isset($decoded['status']) && $decoded['status'] === false) {
+                $reason = $decoded['reason'] ?? $decoded['detail'] ?? 'Gateway menolak pengiriman.';
+
+                // Penjelasan ramah jika terjadi kasus umum
+                if (stripos($reason, 'token invalid') !== false) {
+                    $reason = 'Token Fonnte tidak valid. Periksa kembali token API dari akun Fonnte Anda.';
+                } elseif (stripos($reason, 'device') !== false || stripos($reason, 'disconnect') !== false) {
+                    $reason = 'Perangkat WhatsApp terputus dari Fonnte. Buka dashboard fonnte.com dan scan ulang QR code.';
+                } elseif (stripos($reason, 'target') !== false) {
+                    $reason = 'Nomor tujuan (' . $cleanTarget . ') tidak terdaftar di WhatsApp atau format tidak sesuai.';
+                }
+
+                log_message('warning', 'WhatsApp Fonnte rejected: ' . $reason);
+
+                return [
+                    'status'  => 'error',
+                    'message' => $reason,
+                    'raw'     => $response,
+                ];
+            }
+
             return [
                 'status'   => 'success',
+                'detail'   => $decoded['detail'] ?? 'Pesan berhasil diteruskan ke antrean WhatsApp!',
                 'raw'      => $response,
                 'response' => $decoded,
             ];
@@ -119,22 +251,27 @@ class WhatsAppService
             log_message('error', 'WhatsApp Exception: ' . $e->getMessage());
             return [
                 'status'  => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'Kesalahan sistem: ' . $e->getMessage(),
             ];
         }
     }
 
     /**
      * Uji kirim pesan tes
+     *
+     * @param string $target Nomor tujuan
+     * @param string|null $token Token khusus saat uji coba
+     * @return array
      */
-    public static function testMessage(string $target): array
+    public static function testMessage(string $target, ?string $token = null): array
     {
         $time = date('d M Y, H:i:s');
         $msg = "✅ *KONEKSI NOTIFIKASI WHATSAPP BERHASIL!*\n\n"
-             . "Sistem HIMATIKA Connect telah terhubung ke nomor WhatsApp ini.\n"
-             . "🕒 Waktu tes: {$time} WIB\n\n"
-             . "_Pesan pengujian integrasi gateway Fonnte._";
+             . "Sistem Portal *HIMATIKA Connect* telah berhasil mengirim pesan ke nomor ini.\n"
+             . "🕒 *Waktu Uji:* {$time} WIB\n\n"
+             . "Pesan ini mengonfirmasi bahwa integrasi WhatsApp Gateway (Fonnte) sudah aktif dan siap menerima notifikasi aspirasi baru.\n\n"
+             . "_Pesan otomatis sistem HIMATIKA Hub_";
 
-        return self::sendMessage($target, $msg);
+        return self::sendMessage($target, $msg, $token);
     }
 }

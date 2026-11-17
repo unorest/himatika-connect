@@ -69,6 +69,7 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('toggle-pin/(:num)', 'ModerasiQAController::togglePin/$1');
         $routes->post('delete/(:num)', 'ModerasiQAController::delete/$1');
         $routes->post('test-wa', 'ModerasiQAController::testWhatsApp');
+        $routes->post('save-wa-settings', 'ModerasiQAController::saveWhatsAppSettings');
     });
 
     // Kelola Berita & Artikel
