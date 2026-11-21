@@ -65,9 +65,18 @@ class CertificateController extends BaseController
      */
     public function index()
     {
-        $events = $this->eventModel->orderBy('start_datetime', 'DESC')->findAll(10);
+        // Hanya tampilkan event yang mengaktifkan opsi pendaftaran / E-Sertifikat (allow_registration = 1)
+        $events = $this->eventModel->where('allow_registration', 1)
+                                   ->orderBy('start_datetime', 'DESC')
+                                   ->findAll(10);
 
         $selectedEventId = $this->request->getGet('event_id');
+        if (!empty($selectedEventId)) {
+            $allowedIds = array_map('intval', array_column($events, 'id'));
+            if (!in_array((int) $selectedEventId, $allowedIds, true)) {
+                $selectedEventId = null;
+            }
+        }
 
         $data = [
             'title'           => 'Form Feedback Kegiatan & Unduh E-Sertifikat — HIMATIKA Hub',
@@ -120,11 +129,18 @@ class CertificateController extends BaseController
         $feedback        = trim((string) $this->request->getPost('feedback'));
         $suggestions     = trim((string) $this->request->getPost('suggestions'));
 
-        // Jika event_id dipilih dari daftar resmi, paksa judul resmi dari database agar tidak bisa dimanipulasi
+        // Jika event_id dipilih dari daftar resmi, pastikan penerbitan E-Sertifikat diaktifkan untuk event tersebut
         if ($eventId !== null) {
             $officialEvent = $this->eventModel->find($eventId);
-            if ($officialEvent && !empty($officialEvent['title'])) {
-                $eventTitle = $officialEvent['title'];
+            if ($officialEvent) {
+                if ((int) ($officialEvent['allow_registration'] ?? 0) !== 1) {
+                    return redirect()->to(site_url('sertifikat'))
+                                     ->withInput()
+                                     ->with('error', 'Penerbitan E-Sertifikat untuk kegiatan tersebut tidak diaktifkan.');
+                }
+                if (!empty($officialEvent['title'])) {
+                    $eventTitle = $officialEvent['title'];
+                }
             } else {
                 $eventId = null;
             }

@@ -149,7 +149,7 @@
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Agenda & Workshop Mendatang</h2>
             </div>
             <p class="text-sm text-slate-400 max-w-md mt-2 md:mt-0">
-                Terbuka untuk seluruh mahasiswa. Lihat detail kegiatan atau klaim E-Sertifikat resmi setelah berpartisipasi.
+                Terbuka untuk seluruh mahasiswa. Lihat detail kegiatan atau klaim E-Sertifikat resmi untuk kegiatan yang mendukungnya.
             </p>
         </div>
 
@@ -190,19 +190,20 @@
                             <div class="flex items-center gap-2">
                                 <button type="button"
                                     onclick='openEventModal(<?= json_encode([
-                                        "id"          => $ev["id"],
-                                        "title"       => $ev["title"],
-                                        "category"    => $ev["category_name"] ?? "Event",
-                                        "description" => $ev["description"] ?? "",
-                                        "location"    => $ev["location"] ?? "Kampus / Online",
-                                        "start"       => date("d M Y, H:i", strtotime($ev["start_datetime"])) . " WIB",
-                                        "end"         => !empty($ev["end_datetime"]) ? date("d M Y, H:i", strtotime($ev["end_datetime"])) . " WIB" : "-",
-                                        "quota"       => $ev["max_participants"] ? $ev["max_participants"] . " Peserta" : "Terbuka Umum",
-                                        "certUrl"     => site_url("sertifikat?event_id=" . $ev["id"]),
-                                        "forumUrl"    => site_url("forum#tanya"),
+                                        "id"                => $ev["id"],
+                                        "title"             => $ev["title"],
+                                        "category"          => $ev["category_name"] ?? "Event",
+                                        "description"       => $ev["description"] ?? "",
+                                        "location"          => $ev["location"] ?? "Kampus / Online",
+                                        "start"             => date("d M Y, H:i", strtotime($ev["start_datetime"])) . " WIB",
+                                        "end"               => !empty($ev["end_datetime"]) ? date("d M Y, H:i", strtotime($ev["end_datetime"])) . " WIB" : "-",
+                                        "quota"             => $ev["max_participants"] ? $ev["max_participants"] . " Peserta" : "Terbuka Umum",
+                                        "allowRegistration" => (int) ($ev["allow_registration"] ?? 0),
+                                        "certUrl"           => site_url("sertifikat?event_id=" . $ev["id"]),
+                                        "forumUrl"          => site_url("forum#tanya"),
                                     ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>)'
                                     class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-md transition inline-flex items-center gap-1.5">
-                                    <span>Info & Akses Event</span>
+                                    <span>Info & Detail Event</span>
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </button>
                             </div>
@@ -254,7 +255,7 @@
             <a id="evModalForumLink" href="#" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition text-center">
                 Tanya Panitia
             </a>
-            <a id="evModalCertLink" href="#" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-md transition inline-flex items-center justify-center gap-2">
+            <a id="evModalCertLink" href="#" class="hidden w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-md transition inline-flex items-center justify-center gap-2">
                 <i class="fa-solid fa-award"></i>
                 <span>Portal Feedback & E-Sertifikat</span>
             </a>
@@ -294,8 +295,17 @@
         document.getElementById('evModalEnd').textContent = ev.end;
         document.getElementById('evModalLocation').textContent = ev.location;
         document.getElementById('evModalQuota').textContent = ev.quota;
-        document.getElementById('evModalCertLink').href = ev.certUrl;
         document.getElementById('evModalForumLink').href = ev.forumUrl;
+
+        const certLink = document.getElementById('evModalCertLink');
+        if (ev.allowRegistration === 1) {
+            certLink.href = ev.certUrl;
+            certLink.classList.remove('hidden');
+        } else {
+            certLink.href = '#';
+            certLink.classList.add('hidden');
+        }
+
         document.getElementById('eventDetailModal').classList.remove('hidden');
     }
     function closeEventModal() {
