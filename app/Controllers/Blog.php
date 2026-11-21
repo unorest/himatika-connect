@@ -59,6 +59,7 @@ class Blog extends BaseController
                                 ->join('hmt_users', 'hmt_users.id = hmt_posts.author_id', 'left')
                                 ->join('hmt_divisions', 'hmt_divisions.id = hmt_users.division_id', 'left')
                                 ->where('hmt_posts.slug', $slug)
+                                ->where('hmt_posts.status', 'published')
                                 ->where('hmt_posts.deleted_at', null)
                                 ->first();
 

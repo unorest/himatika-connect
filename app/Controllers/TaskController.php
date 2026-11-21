@@ -22,24 +22,78 @@ class TaskController extends BaseController
         $this->userModel    = new UserModel();
     }
 
+    /**
+     * Ambil ID divisi user dari session secara konsisten.
+     */
+    private function getUserDivisionId(): ?int
+    {
+        $divId = session()->get('user_division_id') ?? session()->get('division_id');
+        return !empty($divId) ? (int) $divId : null;
+    }
+
+    /**
+     * Validasi akses lintas divisi: Admin bebas; Kadiv/Staff hanya program kerja divisinya sendiri.
+     */
+    private function canAccessProgram(?array $program): bool
+    {
+        if (!$program) {
+            return false;
+        }
+
+        if (session()->get('user_role') === 'admin') {
+            return true;
+        }
+
+        $userDivisionId = $this->getUserDivisionId();
+        if ($userDivisionId === null) {
+            // Pengurus BPH tanpa divisi spesifik
+            return true;
+        }
+
+        return (int) ($program['division_id'] ?? 0) === $userDivisionId;
+    }
+
+    /**
+     * Pastikan URL lampiran menggunakan skema http/https yang aman (mencegah javascript: XSS).
+     */
+    private function sanitizeHttpUrl(?string $url): ?string
+    {
+        $clean = trim((string) $url);
+        if ($clean === '') {
+            return null;
+        }
+
+        $scheme = strtolower((string) parse_url($clean, PHP_URL_SCHEME));
+        if (!in_array($scheme, ['http', 'https'], true) || !filter_var($clean, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        return $clean;
+    }
+
     public function index()
     {
-        $userDivisionId = session()->get('user_division_id');
+        $userDivisionId = $this->getUserDivisionId();
         $userRole       = session()->get('user_role');
 
         $programId = $this->request->getGet('program_id') ? (int) $this->request->getGet('program_id') : null;
 
-        // Ambil daftar program kerja yang bisa diakses
+        // Ambil daftar program kerja yang boleh diakses user
         $programsQuery = $this->programModel->select('hmt_work_programs.*, hmt_divisions.name as division_name')
                                             ->join('hmt_divisions', 'hmt_divisions.id = hmt_work_programs.division_id', 'left')
                                             ->where('hmt_work_programs.deleted_at', null);
 
-        if ($userRole !== 'admin' && !empty($userDivisionId)) {
+        if ($userRole !== 'admin' && $userDivisionId !== null) {
             $programsQuery->where('hmt_work_programs.division_id', $userDivisionId);
         }
         $programs = $programsQuery->findAll();
 
-        // Jika belum ada program_id yang dipilih dan ada program, pilih program pertama sebagai default
+        // Validasi program_id yang diminta agar tidak bisa mengintip proker divisi lain
+        $allowedProgramIds = array_map('intval', array_column($programs, 'id'));
+        if ($programId !== null && !in_array($programId, $allowedProgramIds, true)) {
+            $programId = null;
+        }
+
         if (empty($programId) && !empty($programs)) {
             $programId = (int) $programs[0]['id'];
         }
@@ -55,7 +109,7 @@ class TaskController extends BaseController
 
         // Ambil daftar pengurus divisi untuk opsi penugasan (PIC)
         $membersQuery = $this->userModel->where('is_active', 1);
-        if ($userRole !== 'admin' && !empty($userDivisionId)) {
+        if ($userRole !== 'admin' && $userDivisionId !== null) {
             $membersQuery->where('division_id', $userDivisionId);
         }
         $members = $membersQuery->orderBy('name', 'ASC')->findAll();
@@ -84,11 +138,11 @@ class TaskController extends BaseController
     public function storeProgram()
     {
         $userRole       = session()->get('user_role');
-        $userDivisionId = session()->get('user_division_id');
+        $userDivisionId = $this->getUserDivisionId();
         $userId         = session()->get('user_id');
 
         if (!in_array($userRole, ['admin', 'kadiv'], true)) {
-            return redirect()->back()->with('error', 'Hanya Admin BPH atau Kepala Divisi yang dapat membuat program kerja.');
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Hanya Admin BPH atau Kepala Divisi yang dapat membuat program kerja.');
         }
 
         $rules = [
@@ -101,7 +155,7 @@ class TaskController extends BaseController
         }
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to(site_url('dashboard/tasks'))->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $divisionId = ($userRole === 'admin')
@@ -109,8 +163,8 @@ class TaskController extends BaseController
             : (int) $userDivisionId;
 
         $data = [
-            'title'       => trim($this->request->getPost('title')),
-            'description' => trim($this->request->getPost('description') ?? ''),
+            'title'       => trim((string) $this->request->getPost('title')),
+            'description' => trim((string) ($this->request->getPost('description') ?? '')),
             'division_id' => $divisionId,
             'period_year' => (int) $this->request->getPost('period_year'),
             'period_term' => 1,
@@ -136,16 +190,22 @@ class TaskController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to(site_url('dashboard/tasks'))->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $programId = (int) $this->request->getPost('work_program_id');
-        $userId    = session()->get('user_id');
+        $program   = $this->programModel->find($programId);
+
+        if (!$this->canAccessProgram($program)) {
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Akses ditolak. Anda tidak dapat menambahkan tugas ke program kerja divisi lain.');
+        }
+
+        $userId = session()->get('user_id');
 
         $data = [
             'work_program_id' => $programId,
-            'title'           => trim($this->request->getPost('title')),
-            'description'     => trim($this->request->getPost('description') ?? ''),
+            'title'           => trim((string) $this->request->getPost('title')),
+            'description'     => trim((string) ($this->request->getPost('description') ?? '')),
             'status'          => 'todo',
             'priority'        => $this->request->getPost('priority'),
             'assigned_to'     => $this->request->getPost('assigned_to') ? (int) $this->request->getPost('assigned_to') : null,
@@ -171,7 +231,7 @@ class TaskController extends BaseController
             if ($this->request->isAJAX()) {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Status tidak valid']);
             }
-            return redirect()->back()->with('error', 'Status tidak valid');
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Status tidak valid');
         }
 
         $task = $this->taskModel->find($taskId);
@@ -179,7 +239,15 @@ class TaskController extends BaseController
             if ($this->request->isAJAX()) {
                 return $this->response->setJSON(['status' => 'error', 'message' => 'Tugas tidak ditemukan']);
             }
-            return redirect()->back()->with('error', 'Tugas tidak ditemukan');
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Tugas tidak ditemukan');
+        }
+
+        $program = $this->programModel->find((int) $task['work_program_id']);
+        if (!$this->canAccessProgram($program)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Akses ditolak']);
+            }
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Akses ditolak. Anda tidak dapat mengubah tugas milik divisi lain.');
         }
 
         $oldStatus = $task['status'];
@@ -207,27 +275,40 @@ class TaskController extends BaseController
             ]);
         }
 
-        return redirect()->back()->with('success', 'Status tugas berhasil diperbarui ke ' . strtoupper($newStatus) . '!');
+        return redirect()->to(site_url('dashboard/tasks?program_id=' . (int) $task['work_program_id']))
+                         ->with('success', 'Status tugas berhasil diperbarui ke ' . strtoupper($newStatus) . '!');
     }
 
     public function addProgressLog()
     {
         $taskId = (int) $this->request->getPost('task_id');
-        $body   = trim($this->request->getPost('body') ?? '');
+        $body   = trim((string) ($this->request->getPost('body') ?? ''));
 
         if (empty($body)) {
-            return redirect()->back()->with('error', 'Catatan progres tidak boleh kosong.');
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Catatan progres tidak boleh kosong.');
         }
 
         $task = $this->taskModel->find($taskId);
         if (!$task) {
-            return redirect()->back()->with('error', 'Tugas tidak ditemukan.');
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Tugas tidak ditemukan.');
         }
 
-        $newStatus = $this->request->getPost('status_update');
+        $program = $this->programModel->find((int) $task['work_program_id']);
+        if (!$this->canAccessProgram($program)) {
+            return redirect()->to(site_url('dashboard/tasks'))->with('error', 'Akses ditolak. Anda tidak dapat melapor progres pada tugas divisi lain.');
+        }
+
+        $rawAttachment = trim((string) ($this->request->getPost('attachment') ?? ''));
+        $attachment    = $this->sanitizeHttpUrl($rawAttachment);
+        if ($rawAttachment !== '' && $attachment === null) {
+            return redirect()->to(site_url('dashboard/tasks?program_id=' . (int) $task['work_program_id']))
+                             ->with('error', 'Tautan lampiran harus berupa URL valid berawalan http:// atau https://.');
+        }
+
+        $newStatus     = $this->request->getPost('status_update');
         $currentStatus = $task['status'];
 
-        if (!empty($newStatus) && in_array($newStatus, ['todo', 'in_progress', 'review', 'done'])) {
+        if (!empty($newStatus) && in_array($newStatus, ['todo', 'in_progress', 'review', 'done'], true)) {
             $this->taskModel->update($taskId, ['status' => $newStatus]);
             $currentStatus = $newStatus;
         }
@@ -238,13 +319,14 @@ class TaskController extends BaseController
             'user_id'         => $userId,
             'body'            => $body,
             'status_snapshot' => $currentStatus,
-            'attachment'      => trim($this->request->getPost('attachment') ?? ''),
+            'attachment'      => $attachment,
             'logged_date'     => date('Y-m-d'),
         ]);
 
         // Update progress proker
         $this->taskModel->updateProgramProgress((int) $task['work_program_id']);
 
-        return redirect()->back()->with('success', 'Laporan progres tugas berhasil dicatat!');
+        return redirect()->to(site_url('dashboard/tasks?program_id=' . (int) $task['work_program_id']))
+                         ->with('success', 'Laporan progres tugas berhasil dicatat!');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\DivisionModel;
 use App\Models\PasswordResetModel;
 use App\Libraries\WhatsAppService;
 use App\Libraries\EmailService;
@@ -34,6 +35,14 @@ class Auth extends BaseController
 
     public function attemptLogin()
     {
+        $throttler = \Config\Services::throttler();
+        $ipKey     = 'login_ip_' . md5((string) $this->request->getIPAddress());
+
+        // Rate-limiting login untuk mencegah brute-force (maks 10 percobaan per 15 menit per IP)
+        if ($throttler->check($ipKey, 10, 900) === false) {
+            return redirect()->back()->withInput()->with('error', 'Terlalu banyak percobaan login dari perangkat ini. Silakan coba lagi dalam 15 menit.');
+        }
+
         $rules = [
             'login_id' => [
                 'label'  => 'Email atau NIM',
@@ -55,8 +64,14 @@ class Auth extends BaseController
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $loginId  = trim($this->request->getPost('login_id'));
-        $password = $this->request->getPost('password');
+        $loginId  = trim((string) $this->request->getPost('login_id'));
+        $password = (string) $this->request->getPost('password');
+
+        // Rate-limiting per akun (maks 5 percobaan per 15 menit per login_id)
+        $acctKey = 'login_acct_' . md5(strtolower($loginId));
+        if ($throttler->check($acctKey, 5, 900) === false) {
+            return redirect()->back()->withInput()->with('error', 'Terlalu banyak percobaan login untuk akun ini. Silakan tunggu 15 menit.');
+        }
 
         // Cari user berdasarkan email ATAU NIM
         $user = $this->userModel->groupStart()
@@ -84,19 +99,31 @@ class Auth extends BaseController
             'last_login' => date('Y-m-d H:i:s'),
         ]);
 
+        // Ambil nama divisi jika ada agar konsisten di seluruh dashboard
+        $divisionId   = $user['division_id'] ? (int) $user['division_id'] : null;
+        $divisionName = 'BPH';
+        if ($divisionId !== null) {
+            $div = (new DivisionModel())->find($divisionId);
+            if ($div && !empty($div['name'])) {
+                $divisionName = $div['name'];
+            }
+        }
+
         // Rotasi Session ID untuk mencegah Session Fixation
         session()->regenerate(true);
 
-        // Simpan Session
+        // Simpan Session (sertakan division_id dan user_division_id secara konsisten)
         session()->set([
-            'user_id'      => (int) $user['id'],
-            'user_name'    => $user['name'],
-            'user_nim'     => $user['nim'],
-            'user_email'   => $user['email'],
-            'user_role'    => $user['role'],
-            'division_id'  => $user['division_id'] ? (int) $user['division_id'] : null,
-            'user_avatar'  => $user['avatar'],
-            'is_logged_in' => true,
+            'user_id'            => (int) $user['id'],
+            'user_name'          => $user['name'],
+            'user_nim'           => $user['nim'],
+            'user_email'         => $user['email'],
+            'user_role'          => $user['role'],
+            'division_id'        => $divisionId,
+            'user_division_id'   => $divisionId,
+            'user_division_name' => $divisionName,
+            'user_avatar'        => $user['avatar'],
+            'is_logged_in'       => true,
         ]);
 
         return redirect()->to(site_url('dashboard'))->with('success', 'Selamat datang kembali, ' . esc($user['name']) . '!');
@@ -338,8 +365,7 @@ class Auth extends BaseController
         // 1. Validasi Keabsahan dan Masa Berlaku Token / Kode
         $validation = $this->resetModel->validateToken($token, $email ?: null);
         if (!$validation['valid']) {
-            $redirectUrl = site_url('reset-password');
-            return redirect()->to($redirectUrl)->with('error', $validation['message']);
+            return redirect()->to(site_url('reset-password'))->with('error', $validation['message']);
         }
 
         // 2. Validasi Input Kata Sandi Baru

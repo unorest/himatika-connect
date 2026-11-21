@@ -9,20 +9,27 @@
         <p class="text-xs text-slate-500 mt-1">Kelola, verifikasi, dan berikan tanggapan resmi atas pertanyaan mahasiswa umum</p>
     </div>
 
-    <!-- WhatsApp Notification Status Badge & Test -->
+    <!-- WhatsApp Notification Status Badge (Pengaturan & Uji Kirim Khusus Admin BPH) -->
     <div class="flex items-center gap-2">
-        <?php if ($whatsappEnabled): ?>
-            <button type="button" onclick="openTestWaModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm transition" title="Notifikasi otomatis aktif ke: <?= esc($whatsappTarget) ?>">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
-                <span>WA Notif: Aktif</span>
-            </button>
+        <?php if (!empty($canManageWa)): ?>
+            <?php if ($whatsappEnabled): ?>
+                <button type="button" onclick="openTestWaModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm transition" title="Kelola notifikasi WhatsApp">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
+                    <span>WA Notif: Aktif</span>
+                </button>
+            <?php else: ?>
+                <button type="button" onclick="openTestWaModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-sm transition" title="Klik untuk aktivasi WhatsApp">
+                    <i class="fa-brands fa-whatsapp text-slate-400 text-base"></i>
+                    <span>WA Notif: Belum Aktif</span>
+                    <i class="fa-solid fa-circle-info text-[11px] text-slate-400"></i>
+                </button>
+            <?php endif; ?>
         <?php else: ?>
-            <button type="button" onclick="openTestWaModal()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 shadow-sm transition" title="Klik untuk panduan aktivasi WhatsApp">
-                <i class="fa-brands fa-whatsapp text-slate-400 text-base"></i>
-                <span>WA Notif: Belum Aktif</span>
-                <i class="fa-solid fa-circle-info text-[11px] text-slate-400"></i>
-            </button>
+            <span class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold <?= $whatsappEnabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200' ?> border">
+                <i class="fa-brands fa-whatsapp text-base"></i>
+                <span>WA Notif: <?= $whatsappEnabled ? 'Aktif' : 'Nonaktif' ?></span>
+            </span>
         <?php endif; ?>
     </div>
 </div>
@@ -149,14 +156,16 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-2">
-                        <!-- Toggle Pin -->
-                        <form action="<?= site_url('dashboard/moderasi-qa/toggle-pin/' . $q['id']) ?>" method="post">
-                            <?= csrf_field() ?>
-                            <button type="submit" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition" title="Sematkan di Beranda Publik">
-                                <i class="fa-solid fa-thumbtack mr-1 <?= $q['is_pinned'] ? 'text-amber-500' : 'text-slate-400' ?>"></i>
-                                <?= $q['is_pinned'] ? 'Lepas Pin' : 'Sematkan' ?>
-                            </button>
-                        </form>
+                        <?php if (!empty($canModerateAdmin)): ?>
+                            <!-- Toggle Pin (Khusus Admin & Kadiv) -->
+                            <form action="<?= site_url('dashboard/moderasi-qa/toggle-pin/' . $q['id']) ?>" method="post">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition" title="Sematkan di Beranda Publik">
+                                    <i class="fa-solid fa-thumbtack mr-1 <?= $q['is_pinned'] ? 'text-amber-500' : 'text-slate-400' ?>"></i>
+                                    <?= $q['is_pinned'] ? 'Lepas Pin' : 'Sematkan' ?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
 
                         <!-- Tombol Tinjau / Balas -->
                         <a href="<?= site_url('dashboard/moderasi-qa/detail/' . $q['id']) ?>" class="px-4 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
@@ -164,13 +173,15 @@
                             <span><?= $q['status'] === 'answered' ? 'Perbarui Balasan' : 'Beri Jawaban Resmi' ?></span>
                         </a>
 
-                        <!-- Hapus -->
-                        <form action="<?= site_url('dashboard/moderasi-qa/delete/' . $q['id']) ?>" method="post" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pertanyaan ini?')">
-                            <?= csrf_field() ?>
-                            <button type="submit" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Hapus">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </form>
+                        <?php if (!empty($canModerateAdmin)): ?>
+                            <!-- Hapus (Khusus Admin & Kadiv) -->
+                            <form action="<?= site_url('dashboard/moderasi-qa/delete/' . $q['id']) ?>" method="post" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pertanyaan ini?')">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Hapus">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -184,7 +195,8 @@
     <?php endif; ?>
 </div>
 
-<!-- Modal Panduan, Pengaturan & Uji Kirim WhatsApp Notifikasi -->
+<?php if (!empty($canManageWa)): ?>
+<!-- Modal Panduan, Pengaturan & Uji Kirim WhatsApp Notifikasi (Khusus Admin BPH) -->
 <div id="testWaModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -261,12 +273,12 @@
                         <span class="text-rose-500">*</span>
                     </label>
                     <div class="relative">
-                        <input type="password" id="wa_token_input" name="whatsapp_token" value="<?= esc($waSettings['token'] ?? '') ?>" placeholder="Paste token perangkat dari fonnte.com" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500">
+                        <input type="password" id="wa_token_input" name="whatsapp_token" value="" autocomplete="new-password" placeholder="<?= !empty($waSettings['hasToken']) ? 'Token tersimpan (kosongkan jika tidak ingin mengubah)' : 'Paste token perangkat dari fonnte.com' ?>" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500">
                         <button type="button" onclick="toggleTokenVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                             <i id="wa_token_eye" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">Dapatkan token dengan mendaftar di <a href="https://fonnte.com" target="_blank" class="text-brand-600 underline font-semibold">fonnte.com</a> & scan QR.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Demi keamanan, token yang sudah tersimpan tidak ditampilkan kembali. Dapatkan token di <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline font-semibold">fonnte.com</a>.</p>
                 </div>
 
                 <div>
@@ -297,7 +309,7 @@
                     <span class="font-bold text-slate-800 flex items-center gap-1.5">
                         <i class="fa-solid fa-circle-info text-brand-600"></i> Cara Mengetes:
                     </span>
-                    <p>Masukkan nomor WhatsApp Anda di bawah ini, lalu klik tombol Uji Kirim. Sistem akan langsung mengirim pesan pengujian via gateway Fonnte.</p>
+                    <p>Masukkan nomor WhatsApp Anda di bawah ini, lalu klik tombol Uji Kirim. Sistem akan menggunakan token Fonnte yang tersimpan.</p>
                 </div>
 
                 <div>
@@ -307,7 +319,7 @@
 
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Token Fonnte (Opsional untuk uji coba langsung):</label>
-                    <input type="text" name="token" value="<?= esc($waSettings['token'] ?? '') ?>" placeholder="Kosongkan jika ingin memakai token tersimpan" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="password" name="token" value="" autocomplete="new-password" placeholder="Kosongkan untuk memakai token tersimpan" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
@@ -328,7 +340,7 @@
                     <span>3 Langkah Menghubungkan WhatsApp (Fonnte):</span>
                 </div>
                 <ol class="list-decimal list-inside space-y-2 text-[11px] leading-relaxed pt-1 text-slate-700">
-                    <li>Buka situs <a href="https://fonnte.com" target="_blank" class="text-brand-600 font-bold underline">fonnte.com</a> dan buat akun baru gratis.</li>
+                    <li>Buka situs <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer" class="text-brand-600 font-bold underline">fonnte.com</a> dan buat akun baru gratis.</li>
                     <li>Di halaman <strong>Dashboard Fonnte</strong>, klik <strong>Tambah Perangkat (Add Device)</strong>.</li>
                     <li>Klik <strong>Scan QR</strong>, lalu buka WhatsApp di ponsel pengurus > klik <em>Perangkat Tertaut (Linked Devices)</em> > Scan QR tersebut sampai status menjadi <strong>Connect</strong>.</li>
                     <li>Salin <strong>Token</strong> yang tertera pada perangkat tersebut, lalu paste pada tab <strong>Pengaturan & Token</strong> di atas, lalu klik <strong>Simpan</strong>.</li>
@@ -380,5 +392,6 @@ whatsapp.target  = "081234567890"</pre>
         }
     }
 </script>
+<?php endif; ?>
 
 <?= $this->endSection() ?>

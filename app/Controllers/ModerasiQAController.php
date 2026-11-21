@@ -41,7 +41,7 @@ class ModerasiQAController extends BaseController
                       ->join('hmt_users as moderator', 'moderator.id = hmt_forum_questions.moderated_by', 'left')
                       ->where('hmt_forum_questions.deleted_at', null);
 
-        if (!empty($status) && in_array($status, ['pending', 'answered', 'rejected'])) {
+        if (!empty($status) && in_array($status, ['pending', 'answered', 'rejected'], true)) {
             $builder->where('hmt_forum_questions.status', $status);
         }
 
@@ -68,6 +68,14 @@ class ModerasiQAController extends BaseController
         $whatsappEnabled = $waSettings['enabled'] && !empty($waSettings['token']);
         $whatsappTarget  = $waSettings['target'];
 
+        // Jangan pernah kirim token API mentah ke view HTML
+        $safeWaSettings = [
+            'enabled'  => $waSettings['enabled'],
+            'target'   => $waSettings['target'],
+            'provider' => $waSettings['provider'],
+            'hasToken' => !empty($waSettings['token']),
+        ];
+
         $data = [
             'title'            => 'Moderasi Aspirasi & Q&A — HIMATIKA Hub',
             'questions'        => $questions,
@@ -78,56 +86,70 @@ class ModerasiQAController extends BaseController
             'searchQuery'      => $search,
             'whatsappEnabled'  => $whatsappEnabled,
             'whatsappTarget'   => $whatsappTarget,
-            'waSettings'       => $waSettings,
+            'waSettings'       => $safeWaSettings,
+            'canManageWa'      => session()->get('user_role') === 'admin',
+            'canModerateAdmin' => in_array(session()->get('user_role'), ['admin', 'kadiv'], true),
         ];
 
         return view('dashboard/moderasi_qa/index', $data);
     }
 
     /**
-     * Simpan Pengaturan WhatsApp Langsung dari Dashboard
+     * Simpan Pengaturan WhatsApp Langsung dari Dashboard (Khusus Admin BPH)
      */
     public function saveWhatsAppSettings()
     {
-        $enabled = $this->request->getPost('whatsapp_enabled') === '1';
-        $token   = trim($this->request->getPost('whatsapp_token') ?? '');
-        $target  = trim($this->request->getPost('whatsapp_target') ?? '');
+        if (session()->get('user_role') !== 'admin') {
+            return redirect()->to(site_url('dashboard/moderasi-qa'))
+                             ->with('error', 'Akses ditolak. Hanya Admin BPH yang dapat mengubah pengaturan WhatsApp Gateway.');
+        }
+
+        $existing = \App\Libraries\WhatsAppService::getSettings();
+        $enabled  = $this->request->getPost('whatsapp_enabled') === '1';
+        $newToken = trim((string) ($this->request->getPost('whatsapp_token') ?? ''));
+        $token    = $newToken !== '' ? $newToken : $existing['token'];
+        $target   = trim((string) ($this->request->getPost('whatsapp_target') ?? ''));
 
         \App\Libraries\WhatsAppService::saveSettings($enabled, $token, $target);
 
-        return redirect()->back()->with('success', 'Pengaturan notifikasi WhatsApp berhasil disimpan!');
+        return redirect()->to(site_url('dashboard/moderasi-qa'))->with('success', 'Pengaturan notifikasi WhatsApp berhasil disimpan!');
     }
 
     /**
-     * Uji Kirim Notifikasi WhatsApp dari Dashboard
+     * Uji Kirim Notifikasi WhatsApp dari Dashboard (Khusus Admin BPH)
      */
     public function testWhatsApp()
     {
+        if (session()->get('user_role') !== 'admin') {
+            return redirect()->to(site_url('dashboard/moderasi-qa'))
+                             ->with('error', 'Akses ditolak. Hanya Admin BPH yang dapat menjalankan uji kirim WhatsApp.');
+        }
+
         $waSettings = \App\Libraries\WhatsAppService::getSettings();
-        $target     = trim($this->request->getPost('target') ?: $waSettings['target']);
-        $token      = trim($this->request->getPost('token') ?: $waSettings['token']);
+        $target     = trim((string) ($this->request->getPost('target') ?: $waSettings['target']));
+        $token      = trim((string) ($this->request->getPost('token') ?: $waSettings['token']));
 
         if (empty($token)) {
-            return redirect()->back()->with('error', 'Token WhatsApp masih kosong. Masukkan Token API Fonnte Anda terlebih dahulu.');
+            return redirect()->to(site_url('dashboard/moderasi-qa'))->with('error', 'Token WhatsApp masih kosong. Masukkan Token API Fonnte Anda terlebih dahulu.');
         }
 
         if (empty($target)) {
-            return redirect()->back()->with('error', 'Target nomor WhatsApp belum diisi.');
+            return redirect()->to(site_url('dashboard/moderasi-qa'))->with('error', 'Target nomor WhatsApp belum diisi.');
         }
 
         $res = \App\Libraries\WhatsAppService::testMessage($target, $token);
 
         if ($res['status'] === 'success') {
             $detail = !empty($res['detail']) ? ' (' . $res['detail'] . ')' : '';
-            return redirect()->back()->with('success', 'Pesan uji coba WhatsApp berhasil dikirim ke ' . esc($target) . $detail . '!');
+            return redirect()->to(site_url('dashboard/moderasi-qa'))->with('success', 'Pesan uji coba WhatsApp berhasil dikirim ke ' . esc($target) . $detail . '!');
         }
 
-        return redirect()->back()->with('error', 'Gagal mengirim pesan WhatsApp: ' . esc($res['message'] ?? 'Periksa token atau target Anda.'));
+        return redirect()->to(site_url('dashboard/moderasi-qa'))->with('error', 'Gagal mengirim pesan WhatsApp: ' . esc($res['message'] ?? 'Periksa token atau target Anda.'));
     }
 
     public function detail($id)
     {
-        $id = (int) $id;
+        $id       = (int) $id;
         $question = $this->questionModel->getDetailWithAnswers($id);
 
         if (!$question) {
@@ -145,9 +167,13 @@ class ModerasiQAController extends BaseController
     public function answer()
     {
         $questionId = (int) $this->request->getPost('question_id');
-        $body       = trim($this->request->getPost('body') ?? '');
+        $body       = trim((string) ($this->request->getPost('body') ?? ''));
         $status     = $this->request->getPost('status') ?? 'answered';
         $isPinned   = $this->request->getPost('is_pinned') ? 1 : 0;
+
+        if (!in_array($status, ['answered', 'rejected'], true)) {
+            return redirect()->back()->with('error', 'Status moderasi tidak valid.');
+        }
 
         if (empty($body) && $status === 'answered') {
             return redirect()->back()->withInput()->with('error', 'Tanggapan resmi tidak boleh kosong.');
@@ -156,6 +182,11 @@ class ModerasiQAController extends BaseController
         $question = $this->questionModel->find($questionId);
         if (!$question) {
             return redirect()->to(site_url('dashboard/moderasi-qa'))->with('error', 'Pertanyaan tidak ditemukan.');
+        }
+
+        // Hanya admin & kadiv yang dapat mengubah status pin
+        if (!in_array(session()->get('user_role'), ['admin', 'kadiv'], true)) {
+            $isPinned = (int) ($question['is_pinned'] ?? 0);
         }
 
         $userId = session()->get('user_id');
@@ -179,8 +210,8 @@ class ModerasiQAController extends BaseController
             'moderated_at' => $now,
         ]);
 
-        $message = ($status === 'answered') 
-            ? 'Tanggapan resmi berhasil dipublikasikan ke portal publik!' 
+        $message = ($status === 'answered')
+            ? 'Tanggapan resmi berhasil dipublikasikan ke portal publik!'
             : 'Pertanyaan telah ditandai sebagai Ditolak/Spam.';
 
         return redirect()->to(site_url('dashboard/moderasi-qa'))->with('success', $message);
@@ -188,23 +219,39 @@ class ModerasiQAController extends BaseController
 
     public function togglePin($id)
     {
-        $id = (int) $id;
+        if (!in_array(session()->get('user_role'), ['admin', 'kadiv'], true)) {
+            return redirect()->to(site_url('dashboard/moderasi-qa'))
+                             ->with('error', 'Akses ditolak. Hanya Admin BPH atau Kadiv yang dapat menyematkan aspirasi.');
+        }
+
+        $id       = (int) $id;
         $question = $this->questionModel->find($id);
 
         if (!$question) {
-            return redirect()->back()->with('error', 'Pertanyaan tidak ditemukan.');
+            return redirect()->to(site_url('dashboard/moderasi-qa'))->with('error', 'Pertanyaan tidak ditemukan.');
         }
 
         $newPin = $question['is_pinned'] ? 0 : 1;
         $this->questionModel->update($id, ['is_pinned' => $newPin]);
 
         $text = $newPin ? 'Pertanyaan berhasil disematkan di paling atas portal.' : 'Semat pertanyaan dilepas.';
-        return redirect()->back()->with('success', $text);
+        return redirect()->to(site_url('dashboard/moderasi-qa'))->with('success', $text);
     }
 
     public function delete($id)
     {
-        $id = (int) $id;
+        if (!in_array(session()->get('user_role'), ['admin', 'kadiv'], true)) {
+            return redirect()->to(site_url('dashboard/moderasi-qa'))
+                             ->with('error', 'Akses ditolak. Hanya Admin BPH atau Kadiv yang dapat menghapus aspirasi.');
+        }
+
+        $id       = (int) $id;
+        $question = $this->questionModel->find($id);
+
+        if (!$question) {
+            return redirect()->to(site_url('dashboard/moderasi-qa'))->with('error', 'Pertanyaan tidak ditemukan.');
+        }
+
         $this->questionModel->delete($id);
 
         return redirect()->to(site_url('dashboard/moderasi-qa'))->with('success', 'Aspirasi / pertanyaan berhasil dihapus.');

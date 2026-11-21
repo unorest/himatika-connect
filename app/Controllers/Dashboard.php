@@ -11,7 +11,7 @@ class Dashboard extends BaseController
     public function index()
     {
         $userId     = session()->get('user_id');
-        $divisionId = session()->get('user_division_id');
+        $divisionId = session()->get('user_division_id') ?? session()->get('division_id');
         $role       = session()->get('user_role');
 
         $db = \Config\Database::connect();
@@ -33,7 +33,7 @@ class Dashboard extends BaseController
                           ->where('hmt_work_programs.deleted_at', null);
 
         if ($role !== 'admin' && !empty($divisionId)) {
-            $prokerQuery->where('hmt_work_programs.division_id', $divisionId);
+            $prokerQuery->where('hmt_work_programs.division_id', (int) $divisionId);
         }
         $workPrograms = $prokerQuery->get()->getResultArray();
 

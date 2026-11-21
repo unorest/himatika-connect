@@ -65,7 +65,6 @@ class CertificateController extends BaseController
      */
     public function index()
     {
-        // Ambil daftar event aktif / terbaru untuk opsi dropdown
         $events = $this->eventModel->orderBy('start_datetime', 'DESC')->findAll(10);
 
         $selectedEventId = $this->request->getGet('event_id');
@@ -84,6 +83,13 @@ class CertificateController extends BaseController
      */
     public function submit()
     {
+        // Rate-limiting anti-spam & anti-abuse (maks 5 pengajuan per 15 menit per IP)
+        $throttler = \Config\Services::throttler();
+        $ipKey     = 'cert_submit_' . md5((string) $this->request->getIPAddress());
+        if ($throttler->check($ipKey, 5, 900) === false) {
+            return redirect()->to(site_url('sertifikat'))->with('error', 'Terlalu banyak permintaan penerbitan sertifikat. Silakan coba lagi dalam 15 menit.');
+        }
+
         // Anti-spam honeypot
         if (!empty($this->request->getPost('website_url'))) {
             return redirect()->to(site_url('sertifikat'))->with('error', 'Spam terdeteksi.');
@@ -101,42 +107,42 @@ class CertificateController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to(site_url('sertifikat'))->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $participantName = trim($this->request->getPost('participant_name'));
-        $identifier      = trim($this->request->getPost('identifier'));
-        $email           = strtolower(trim($this->request->getPost('email')));
-        $institution     = trim($this->request->getPost('institution')) ?: 'Civitas Akademika';
-        $eventTitle      = trim($this->request->getPost('event_title'));
-        $eventId         = $this->request->getPost('event_id') ? (int)$this->request->getPost('event_id') : null;
-        $rating          = (int)$this->request->getPost('rating');
-        $feedback        = trim($this->request->getPost('feedback'));
-        $suggestions     = trim($this->request->getPost('suggestions'));
+        $participantName = trim((string) $this->request->getPost('participant_name'));
+        $identifier      = trim((string) $this->request->getPost('identifier'));
+        $email           = strtolower(trim((string) $this->request->getPost('email')));
+        $institution     = trim((string) $this->request->getPost('institution')) ?: 'Civitas Akademika';
+        $eventTitle      = trim((string) $this->request->getPost('event_title'));
+        $eventId         = $this->request->getPost('event_id') ? (int) $this->request->getPost('event_id') : null;
+        $rating          = (int) $this->request->getPost('rating');
+        $feedback        = trim((string) $this->request->getPost('feedback'));
+        $suggestions     = trim((string) $this->request->getPost('suggestions'));
 
-        // Cek apakah peserta sudah pernah mengisi feedback untuk event yang sama
+        // Jika event_id dipilih dari daftar resmi, paksa judul resmi dari database agar tidak bisa dimanipulasi
+        if ($eventId !== null) {
+            $officialEvent = $this->eventModel->find($eventId);
+            if ($officialEvent && !empty($officialEvent['title'])) {
+                $eventTitle = $officialEvent['title'];
+            } else {
+                $eventId = null;
+            }
+        }
+
+        // Cegah overwrite data & pencurian kode verifikasi milik peserta lain
         $existing = $this->certModel->where('email', $email)
                                     ->where('event_name', $eventTitle)
                                     ->first();
 
         if ($existing) {
-            // Update feedback terbaru jika sudah pernah ada, lalu arahkan ke halaman download
-            $this->certModel->update($existing['id'], [
-                'participant_name' => $participantName,
-                'identifier'       => $identifier,
-                'institution'      => $institution,
-                'rating'           => $rating,
-                'feedback'         => $feedback,
-                'suggestions'      => $suggestions,
-                'ip_address'       => $this->request->getIPAddress(),
-            ]);
-
-            return redirect()->to(site_url('sertifikat/sukses/' . $existing['verification_code']))
-                             ->with('info', 'Feedback Anda telah diperbarui. Silakan unduh sertifikat resmi Anda di bawah ini.');
+            return redirect()->to(site_url('sertifikat'))
+                             ->withInput()
+                             ->with('error', 'Email ini sudah pernah digunakan untuk menerbitkan E-Sertifikat kegiatan tersebut. Demi keamanan data peserta, sertifikat yang sudah terbit tidak dapat ditimpa ulang—silakan gunakan kode verifikasi Anda atau hubungi panitia HIMATIKA.');
         }
 
         // Generate nomor sertifikat dan kode verifikasi unik
-        $certNo = $this->certModel->generateCertificateNo();
+        $certNo     = $this->certModel->generateCertificateNo();
         $verifyCode = $this->certModel->generateVerificationCode();
 
         $data = [
@@ -193,14 +199,13 @@ class CertificateController extends BaseController
             return redirect()->to(site_url('sertifikat'))->with('error', 'Sertifikat tidak ditemukan.');
         }
 
-        // Catat statistik unduhan
         $this->certModel->update($cert['id'], [
-            'download_count'     => (int)$cert['download_count'] + 1,
+            'download_count'     => (int) $cert['download_count'] + 1,
             'last_downloaded_at' => date('Y-m-d H:i:s'),
         ]);
 
         $pdfService = new CertificatePdf();
-        $pdfService->generate($cert, 'D'); // Mode 'D' = Force Download
+        $pdfService->generate($cert, 'D');
         exit;
     }
 
@@ -216,7 +221,7 @@ class CertificateController extends BaseController
         }
 
         $pdfService = new CertificatePdf();
-        $pdfService->generate($cert, 'I'); // Mode 'I' = Inline Preview
+        $pdfService->generate($cert, 'I');
         exit;
     }
 
@@ -225,7 +230,7 @@ class CertificateController extends BaseController
      */
     public function verify(string $code = '')
     {
-        $searchCode = $code ?: $this->request->getGet('code');
+        $searchCode  = $code ?: $this->request->getGet('code');
         $certificate = null;
 
         if (!empty($searchCode)) {
@@ -255,10 +260,10 @@ class CertificateController extends BaseController
         $builder = $this->certModel->orderBy('created_at', 'DESC');
 
         if (!empty($eventId)) {
-            $builder->where('event_id', (int)$eventId);
+            $builder->where('event_id', (int) $eventId);
         }
         if (!empty($rating)) {
-            $builder->where('rating', (int)$rating);
+            $builder->where('rating', (int) $rating);
         }
         if (!empty($search)) {
             $builder->groupStart()
@@ -272,10 +277,9 @@ class CertificateController extends BaseController
         $certificates = $builder->findAll();
         $events       = $this->eventModel->orderBy('start_datetime', 'DESC')->findAll();
 
-        // Hitung statistik
-        $all = $this->certModel->findAll();
-        $totalCerts = count($all);
-        $avgRating = $totalCerts > 0 ? array_sum(array_column($all, 'rating')) / $totalCerts : 0;
+        $all            = $this->certModel->findAll();
+        $totalCerts     = count($all);
+        $avgRating      = $totalCerts > 0 ? array_sum(array_column($all, 'rating')) / $totalCerts : 0;
         $totalDownloads = array_sum(array_column($all, 'download_count'));
 
         $data = [
@@ -286,10 +290,10 @@ class CertificateController extends BaseController
             'selectedRating' => $rating,
             'searchQuery'    => $search,
             'stats'          => [
-                'total'          => $totalCerts,
-                'avg_rating'     => round($avgRating, 1),
-                'total_downloads'=> $totalDownloads,
-            ]
+                'total'           => $totalCerts,
+                'avg_rating'      => round($avgRating, 1),
+                'total_downloads' => $totalDownloads,
+            ],
         ];
 
         return view('dashboard/certificates/index', $data);

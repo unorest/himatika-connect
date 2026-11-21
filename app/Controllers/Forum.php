@@ -26,12 +26,12 @@ class Forum extends BaseController
         $categories = $this->categoryModel->getByType('forum');
 
         $data = [
-            'title'              => 'Forum Aspirasi & Q&A Terkurasi — HIMATIKA Connect',
-            'questions'          => $questions,
-            'categories'         => $categories,
-            'selectedCategory'   => $categoryId,
-            'selectedStatus'     => $status,
-            'searchQuery'        => $search,
+            'title'            => 'Forum Aspirasi & Q&A Terkurasi — HIMATIKA Connect',
+            'questions'        => $questions,
+            'categories'       => $categories,
+            'selectedCategory' => $categoryId,
+            'selectedStatus'   => $status,
+            'searchQuery'      => $search,
         ];
 
         return view('forum/index', $data);
@@ -55,9 +55,16 @@ class Forum extends BaseController
 
     public function store()
     {
+        // Rate-limiting anti-spam & pelindung kuota WhatsApp Gateway (maks 5 kiriman per 15 menit per IP)
+        $throttler = \Config\Services::throttler();
+        $ipKey     = 'forum_store_' . md5((string) $this->request->getIPAddress());
+        if ($throttler->check($ipKey, 5, 900) === false) {
+            return redirect()->to(site_url('forum'))->with('error', 'Terlalu banyak kiriman aspirasi dalam waktu singkat. Silakan tunggu beberapa menit sebelum mengirim lagi.');
+        }
+
         // Honeypot check (field tersembunyi yang tidak boleh diisi manusia)
         if (!empty($this->request->getPost('website_url'))) {
-            return redirect()->back()->with('error', 'Spam detected.');
+            return redirect()->to(site_url('forum'))->with('error', 'Spam terdeteksi.');
         }
 
         $rules = [
@@ -66,24 +73,24 @@ class Forum extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+            return redirect()->to(site_url('forum'))->withInput()->with('errors', $this->validator->getErrors());
         }
 
         $isAnonymous = $this->request->getPost('is_anonymous') ? 1 : 0;
-        $authorName  = trim($this->request->getPost('author_name') ?? '');
+        $authorName  = trim((string) ($this->request->getPost('author_name') ?? ''));
         if ($isAnonymous || empty($authorName)) {
-            $authorName = 'Mahasiswa Anonim';
+            $authorName  = 'Mahasiswa Anonim';
             $isAnonymous = 1;
         }
 
         $ipAddress = $this->request->getIPAddress();
 
         $data = [
-            'title'        => $this->request->getPost('title'),
-            'body'         => $this->request->getPost('body'),
+            'title'        => trim((string) $this->request->getPost('title')),
+            'body'         => trim((string) $this->request->getPost('body')),
             'author_name'  => $authorName,
-            'author_nim'   => $isAnonymous ? null : trim($this->request->getPost('author_nim') ?? ''),
-            'author_email' => $isAnonymous ? null : trim($this->request->getPost('author_email') ?? ''),
+            'author_nim'   => $isAnonymous ? null : trim((string) ($this->request->getPost('author_nim') ?? '')),
+            'author_email' => $isAnonymous ? null : trim((string) ($this->request->getPost('author_email') ?? '')),
             'is_anonymous' => $isAnonymous,
             'category_id'  => $this->request->getPost('category_id') ? (int) $this->request->getPost('category_id') : null,
             'status'       => 'pending',
@@ -114,8 +121,24 @@ class Forum extends BaseController
 
     public function upvote($id)
     {
-        $id = (int) $id;
-        $ip = $this->request->getIPAddress();
+        $throttler = \Config\Services::throttler();
+        $ip        = (string) $this->request->getIPAddress();
+        if ($throttler->check('forum_upvote_' . md5($ip), 20, 900) === false) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(429)->setJSON(['status' => 'error', 'message' => 'Terlalu banyak permintaan upvote.']);
+            }
+            return redirect()->to(site_url('forum'))->with('warning', 'Terlalu banyak permintaan upvote. Coba lagi beberapa menit lagi.');
+        }
+
+        $id       = (int) $id;
+        $question = $this->forumModel->find($id);
+        if (!$question) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(404)->setJSON(['status' => 'error', 'message' => 'Pertanyaan tidak ditemukan.']);
+            }
+            return redirect()->to(site_url('forum'))->with('error', 'Pertanyaan tidak ditemukan.');
+        }
+
         $db = \Config\Database::connect();
 
         // Cek apakah IP ini sudah upvote

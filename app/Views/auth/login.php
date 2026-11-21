@@ -57,23 +57,25 @@
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2.5">
                     <i class="fa-solid fa-circle-check text-sm"></i>
-                    <span><?= session()->getFlashdata('success') ?></span>
+                    <span><?= esc(session()->getFlashdata('success')) ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if (session()->getFlashdata('warning')): ?>
                 <div class="mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2.5">
                     <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                    <span><?= session()->getFlashdata('warning') ?></span>
+                    <span><?= esc(session()->getFlashdata('warning')) ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if (session()->getFlashdata('error') || session()->getFlashdata('errors')): ?>
                 <div class="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs space-y-1">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-circle-xmark text-sm"></i>
-                        <span><?= session()->getFlashdata('error') ?></span>
-                    </div>
+                    <?php if (session()->getFlashdata('error')): ?>
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-xmark text-sm"></i>
+                            <span><?= esc(session()->getFlashdata('error')) ?></span>
+                        </div>
+                    <?php endif; ?>
                     <?php if (is_array(session()->getFlashdata('errors'))): ?>
                         <ul class="list-disc pl-5">
                             <?php foreach (session()->getFlashdata('errors') as $err): ?>
@@ -92,7 +94,7 @@
                     <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Pengurus / NIM</label>
                     <div class="relative">
                         <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" name="login_id" id="login_id" required value="<?= old('login_id') ?>" placeholder="admin@himatika.org / 240401000000" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        <input type="text" name="login_id" id="login_id" required value="<?= esc(old('login_id')) ?>" placeholder="email@himatika.org / NIM" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
                     </div>
                 </div>
 
@@ -115,26 +117,28 @@
                 </button>
             </form>
 
-            <!-- Quick Demo Accounts Cheatsheet -->
-            <div class="mt-8 pt-6 border-t border-slate-700/60">
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3 text-center">
-                    Demo Akun Uji Coba (Klik Cepat)
-                </span>
-                <div class="grid grid-cols-3 gap-2 text-xs">
-                    <button type="button" onclick="fillCredential('rabiah@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-brand-500 text-left transition group">
-                        <div class="text-[10px] font-bold uppercase text-brand-400">Ketua (Admin)</div>
-                        <div class="font-semibold text-slate-300 truncate mt-0.5">rabiah@</div>
-                    </button>
-                    <button type="button" onclick="fillCredential('dimas@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-emerald-500 text-left transition group">
-                        <div class="text-[10px] font-bold uppercase text-emerald-400">Kadiv</div>
-                        <div class="font-semibold text-slate-300 truncate mt-0.5">dimas@</div>
-                    </button>
-                    <button type="button" onclick="fillCredential('vina@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-purple-500 text-left transition group">
-                        <div class="text-[10px] font-bold uppercase text-purple-400">Anggota</div>
-                        <div class="font-semibold text-slate-300 truncate mt-0.5">vina@</div>
-                    </button>
+            <?php if (defined('ENVIRONMENT') && ENVIRONMENT === 'development'): ?>
+                <!-- Quick Demo Accounts Cheatsheet (Hanya tampil di mode development) -->
+                <div class="mt-8 pt-6 border-t border-slate-700/60">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3 text-center">
+                        Demo Akun Uji Coba (Development Only)
+                    </span>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <button type="button" onclick="fillCredential('rabiah@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-brand-500 text-left transition group">
+                            <div class="text-[10px] font-bold uppercase text-brand-400">Ketua (Admin)</div>
+                            <div class="font-semibold text-slate-300 truncate mt-0.5">rabiah@</div>
+                        </button>
+                        <button type="button" onclick="fillCredential('dimas@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-emerald-500 text-left transition group">
+                            <div class="text-[10px] font-bold uppercase text-emerald-400">Kadiv</div>
+                            <div class="font-semibold text-slate-300 truncate mt-0.5">dimas@</div>
+                        </button>
+                        <button type="button" onclick="fillCredential('vina@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-purple-500 text-left transition group">
+                            <div class="text-[10px] font-bold uppercase text-purple-400">Anggota</div>
+                            <div class="font-semibold text-slate-300 truncate mt-0.5">vina@</div>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
         </div>
 
         <p class="text-xs text-slate-500 text-center">
@@ -142,11 +146,13 @@
         </p>
     </div>
 
-    <script>
-        function fillCredential(email) {
-            document.getElementById('login_id').value = email;
-            document.getElementById('password').value = 'password123';
-        }
-    </script>
+    <?php if (defined('ENVIRONMENT') && ENVIRONMENT === 'development'): ?>
+        <script>
+            function fillCredential(email) {
+                document.getElementById('login_id').value = email;
+                document.getElementById('password').value = 'password123';
+            }
+        </script>
+    <?php endif; ?>
 </body>
 </html>

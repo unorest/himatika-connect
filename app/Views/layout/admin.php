@@ -128,12 +128,15 @@
             </nav>
         </div>
 
-        <!-- Logout Bottom Section -->
+        <!-- Logout Bottom Section (POST + CSRF untuk mencegah Logout CSRF) -->
         <div class="p-4 border-t border-slate-800">
-            <a href="<?= site_url('logout') ?>" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Keluar (Logout)</span>
-            </a>
+            <form action="<?= site_url('logout') ?>" method="post">
+                <?= csrf_field() ?>
+                <button type="submit" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Keluar (Logout)</span>
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -169,14 +172,14 @@
             <?php if (session()->getFlashdata('success')): ?>
                 <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-3 shadow-sm">
                     <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                    <div><?= session()->getFlashdata('success') ?></div>
+                    <div><?= esc(session()->getFlashdata('success')) ?></div>
                 </div>
             <?php endif; ?>
 
             <?php if (session()->getFlashdata('error')): ?>
                 <div class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-3 shadow-sm">
                     <i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>
-                    <div><?= session()->getFlashdata('error') ?></div>
+                    <div><?= esc(session()->getFlashdata('error')) ?></div>
                 </div>
             <?php endif; ?>
 

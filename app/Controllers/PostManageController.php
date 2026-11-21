@@ -29,7 +29,25 @@ class PostManageController extends BaseController
             return true;
         }
 
-        return (int) ($post['author_id'] ?? 0) === $userId;
+        return $userId > 0 && (int) ($post['author_id'] ?? 0) === $userId;
+    }
+
+    /**
+     * Validasi URL thumbnail agar hanya menerima skema http/https yang aman.
+     */
+    private function sanitizeHttpUrl(?string $url): ?string
+    {
+        $clean = trim((string) $url);
+        if ($clean === '') {
+            return '';
+        }
+
+        $scheme = strtolower((string) parse_url($clean, PHP_URL_SCHEME));
+        if (!in_array($scheme, ['http', 'https'], true) || !filter_var($clean, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        return $clean;
     }
 
     /**
@@ -137,6 +155,13 @@ class PostManageController extends BaseController
                              ->with('errors', $this->validator->getErrors());
         }
 
+        $thumbnail = $this->sanitizeHttpUrl($this->request->getPost('thumbnail'));
+        if ($thumbnail === null) {
+            return redirect()->to(site_url('dashboard/posts/create'))
+                             ->withInput()
+                             ->with('errors', ['thumbnail' => 'Tautan gambar sampul harus berupa URL valid berawalan http:// atau https://.']);
+        }
+
         $title = trim((string) $this->request->getPost('title'));
         $slug  = url_title($title, '-', true);
 
@@ -159,7 +184,7 @@ class PostManageController extends BaseController
             'slug'         => $slug,
             'body'         => $body,
             'excerpt'      => trim((string) ($this->request->getPost('excerpt') ?? '')),
-            'thumbnail'    => trim((string) ($this->request->getPost('thumbnail') ?? '')),
+            'thumbnail'    => $thumbnail,
             'author_id'    => session()->get('user_id'),
             'category_id'  => (int) $this->request->getPost('category_id'),
             'status'       => $status,
@@ -216,6 +241,13 @@ class PostManageController extends BaseController
                              ->with('errors', $this->validator->getErrors());
         }
 
+        $thumbnail = $this->sanitizeHttpUrl($this->request->getPost('thumbnail'));
+        if ($thumbnail === null) {
+            return redirect()->to(site_url('dashboard/posts/edit/' . $id))
+                             ->withInput()
+                             ->with('errors', ['thumbnail' => 'Tautan gambar sampul harus berupa URL valid berawalan http:// atau https://.']);
+        }
+
         $status      = $this->request->getPost('status');
         $publishedAt = $post['published_at'];
         if ($status === 'published' && empty($publishedAt)) {
@@ -226,7 +258,7 @@ class PostManageController extends BaseController
             'title'        => trim((string) $this->request->getPost('title')),
             'body'         => HtmlSanitizer::clean((string) $this->request->getPost('body')),
             'excerpt'      => trim((string) ($this->request->getPost('excerpt') ?? '')),
-            'thumbnail'    => trim((string) ($this->request->getPost('thumbnail') ?? '')),
+            'thumbnail'    => $thumbnail,
             'category_id'  => (int) $this->request->getPost('category_id'),
             'status'       => $status,
             'read_time'    => (int) $this->request->getPost('read_time'),
