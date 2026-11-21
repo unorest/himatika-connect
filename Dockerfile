@@ -1,7 +1,8 @@
 FROM php:8.2-apache
 
-# Install dependencies and required PHP extensions for CodeIgniter 4
+# Install dependencies, CA certificates (for TLS to TiDB Cloud & Fonnte), and PHP extensions
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
     libicu-dev \
     libzip-dev \
     zip \
@@ -12,9 +13,13 @@ RUN apt-get update && apt-get install -y \
     pdo \
     pdo_mysql \
     intl \
+    && update-ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite for CodeIgniter 4 clean URLs
+# Install Composer 2
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Enable Apache mod_rewrite & headers for CodeIgniter 4
 RUN a2enmod rewrite headers
 
 # Set Apache DocumentRoot to CodeIgniter's public/ folder
@@ -32,14 +37,19 @@ RUN echo '<Directory /var/www/html/public>\n\
 # Set workdir
 WORKDIR /var/www/html
 
+# Install PHP dependencies first for better Docker layer caching
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
 # Copy project files
 COPY . /var/www/html
 
-# Set permissions for writable directory
-RUN chown -R www-data:www-data /var/www/html/writable \
+# Ensure writable directories exist and have proper permissions
+RUN mkdir -p /var/www/html/writable/cache /var/www/html/writable/logs /var/www/html/writable/session /var/www/html/writable/uploads \
+    && chown -R www-data:www-data /var/www/html/writable \
     && chmod -R 775 /var/www/html/writable
 
-# Entrypoint script to support Render PORT variable and optional migrations
+# Entrypoint script to support Render PORT variable and automatic migrations
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
