@@ -274,4 +274,66 @@ class WhatsAppService
 
         return self::sendMessage($target, $msg, $token);
     }
+
+    /**
+     * Kirim tautan dan kode reset kata sandi via WhatsApp resmi ke pengurus
+     *
+     * @param string $target Nomor WhatsApp tujuan pengurus
+     * @param string $userName Nama lengkap pengurus
+     * @param string $userEmail Email akun pengurus
+     * @param string $resetUrl Tautan reset unik dengan token kriptografi
+     * @param string $shortCode Kode numerik 6-digit acak
+     * @param int $expiresMinutes Batas waktu berlaku dalam menit
+     * @return array
+     */
+    public static function sendPasswordResetLink(string $target, string $userName, string $userEmail, string $resetUrl, string $shortCode, int $expiresMinutes = 15): array
+    {
+        $time = date('H:i') . ' WIB';
+        $expiresTime = date('H:i', time() + ($expiresMinutes * 60)) . ' WIB';
+
+        $msg = "🔐 *PERMINTAAN RESET KATA SANDI*\n"
+             . "*Portal Resmi HIMATIKA Connect*\n"
+             . "━━━━━━━━━━━━━━━━━━━━━\n"
+             . "Halo, *{$userName}*!\n\n"
+             . "Kami menerima permintaan reset kata sandi untuk akun pengurus Anda:\n"
+             . "📧 *Email:* {$userEmail}\n"
+             . "🕒 *Diajukan:* {$time}\n\n"
+             . "Silakan klik tautan resmi di bawah ini untuk membuat kata sandi baru:\n"
+             . "👉 {$resetUrl}\n\n"
+             . "🔢 *Kode Verifikasi Singkat:* *{$shortCode}*\n"
+             . "⏳ *Masa Berlaku:* {$expiresMinutes} menit (berakhir pukul *{$expiresTime}*)\n\n"
+             . "⚠️ *PERINGATAN KEAMANAN:*\n"
+             . "• Tautan ini bersifat rahasia dan sekali pakai.\n"
+             . "• Jangan pernah membagikan tautan atau kode ini kepada siapapun.\n"
+             . "• Jika Anda *TIDAK PERNAH* meminta reset kata sandi, abaikan pesan ini. Akun Anda tetap aman.\n"
+             . "━━━━━━━━━━━━━━━━━━━━━\n"
+             . "_Sistem Keamanan Akun Pengurus HIMATIKA Hub_";
+
+        return self::sendMessage($target, $msg);
+    }
+
+    /**
+     * Kirim pemberitahuan keamanan setelah kata sandi berhasil diubah
+     *
+     * @param string $target
+     * @param string $userName
+     * @param string $userEmail
+     * @return array
+     */
+    public static function sendPasswordChangedNotification(string $target, string $userName, string $userEmail): array
+    {
+        $time = date('d M Y, H:i') . ' WIB';
+
+        $msg = "🔔 *PEMBERITAHUAN KEAMANAN AKUN*\n"
+             . "*Portal Resmi HIMATIKA Connect*\n"
+             . "━━━━━━━━━━━━━━━━━━━━━\n"
+             . "Halo, *{$userName}*!\n\n"
+             . "Kata sandi untuk akun pengurus Anda (*{$userEmail}*) telah *BERHASIL DIUBAH* pada {$time}.\n\n"
+             . "Jika Anda yang melakukan perubahan ini, Anda dapat mengabaikan pesan ini.\n\n"
+             . "🚨 *PENTING:* Jika Anda *TIDAK MERASA* mengubah kata sandi, segera hubungi Administrator BPH HIMATIKA untuk mengamankan akun Anda.\n"
+             . "━━━━━━━━━━━━━━━━━━━━━\n"
+             . "_Sistem Keamanan Akun HIMATIKA Hub_";
+
+        return self::sendMessage($target, $msg);
+    }
 }

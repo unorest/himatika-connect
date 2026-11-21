@@ -49,6 +49,7 @@ CREATE TABLE `hmt_users` (
   `name` varchar(100) NOT NULL,
   `nim` varchar(20) NOT NULL,
   `email` varchar(150) NOT NULL,
+  `phone` varchar(30) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
   `avatar` varchar(255) DEFAULT NULL,
   `role` enum('admin','kadiv','staff') NOT NULL DEFAULT 'staff',
@@ -574,6 +575,7 @@ CREATE TABLE `hmt_certificates` (
   `participant_name` varchar(255) NOT NULL,
   `identifier` varchar(50) DEFAULT NULL COMMENT 'NIM / NIP / No. Identitas',
   `email` varchar(150) NOT NULL,
+  `phone` varchar(30) DEFAULT NULL,
   `institution` varchar(150) DEFAULT NULL,
   `role` varchar(50) NOT NULL DEFAULT 'Peserta',
   `rating` tinyint(1) DEFAULT NULL,
@@ -599,6 +601,27 @@ CREATE TABLE `hmt_certificates` (
 -- --------------------------------------------------------
 INSERT INTO `hmt_certificates` (`id`, `certificate_no`, `verification_code`, `event_id`, `event_name`, `participant_name`, `identifier`, `email`, `institution`, `role`, `rating`, `feedback`, `suggestions`, `download_count`, `last_downloaded_at`, `ip_address`, `user_agent`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 'CERT-HMT-2026-0001', 'HMT7F2A9B', 1, 'HIMATIKA Hackfest 2026: AI & Web Innovation Challenge', 'Budi Santoso', '22010099', 'budi.santoso@gmail.com', 'Universitas Teknologi', 'Peserta', 5, 'Acara sangat berbobot dan materi praktis!', 'Sediakan lebih banyak snack dan durasi sesi Q&A.', 1, '2026-11-16 12:15:23', '127.0.0.1', 'Mozilla/5.0 Demo Browser', '2026-11-16 12:15:23', '2026-11-16 12:15:23', NULL);
+
+-- --------------------------------------------------------
+-- Table structure for table: hmt_password_resets
+-- --------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `hmt_password_resets` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `email` varchar(150) NOT NULL,
+  `token` varchar(64) NOT NULL,
+  `code` varchar(64) DEFAULT NULL,
+  `plain_code` varchar(10) DEFAULT NULL,
+  `channel` varchar(20) NOT NULL DEFAULT 'whatsapp',
+  `target` varchar(100) DEFAULT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `token` (`token`),
+  KEY `email` (`email`),
+  KEY `plain_code` (`plain_code`),
+  KEY `expires_at` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;

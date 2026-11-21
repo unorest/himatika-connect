@@ -36,7 +36,11 @@ $routes->group('sertifikat', function ($routes) {
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::attemptLogin');
 $routes->get('forgot-password', 'Auth::forgotPassword');
-$routes->post('forgot-password', 'Auth::attemptResetPassword');
+$routes->post('forgot-password', 'Auth::sendResetLink');
+$routes->get('reset-password/(:any)', 'Auth::resetPassword/$1');
+$routes->get('reset-password', 'Auth::resetPassword');
+$routes->post('reset-password/(:any)', 'Auth::attemptResetPasswordWithToken/$1');
+$routes->post('reset-password', 'Auth::attemptResetPasswordWithToken');
 $routes->get('logout', 'Auth::logout');
 $routes->post('logout', 'Auth::logout');
 

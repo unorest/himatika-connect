@@ -19,7 +19,7 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
 </head>
@@ -34,98 +34,181 @@
         <!-- Card Container -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
 
-            <!-- Logo & Title -->
-            <div class="text-center space-y-2 mb-6">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center text-xl font-black mx-auto shadow-lg shadow-brand-500/25">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-                <h1 class="text-2xl font-extrabold text-white tracking-tight">Reset Kata Sandi</h1>
-                <p class="text-xs text-slate-400">Verifikasi identitas NIM & Email pengurus untuk membuat kata sandi baru</p>
-            </div>
-
-            <!-- Flash Alerts -->
-            <?php if (session()->getFlashdata('success')): ?>
-                <div class="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2.5">
-                    <i class="fa-solid fa-circle-check text-sm"></i>
-                    <span><?= session()->getFlashdata('success') ?></span>
-                </div>
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('error') || session()->getFlashdata('errors')): ?>
-                <div class="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs space-y-1">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-circle-xmark text-sm"></i>
-                        <span><?= session()->getFlashdata('error') ?></span>
+            <?php if (session()->getFlashdata('reset_sent')): ?>
+                <!-- STATUS TERKIRIM (SUCCESS CONFIRMATION SCREEN) -->
+                <div class="text-center space-y-4">
+                    <div class="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mx-auto shadow-xl shadow-emerald-500/10">
+                        <i class="fa-solid fa-paper-plane"></i>
                     </div>
-                    <?php if (is_array(session()->getFlashdata('errors'))): ?>
-                        <ul class="list-disc pl-5">
-                            <?php foreach (session()->getFlashdata('errors') as $err): ?>
-                                <li><?= esc($err) ?></li>
-                            <?php endforeach; ?>
+
+                    <div class="space-y-1.5">
+                        <h2 class="text-2xl font-extrabold text-white tracking-tight">Tautan Berhasil Dikirim!</h2>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Tautan & kode verifikasi reset kata sandi telah dikirimkan ke:
+                        </p>
+                        <div class="inline-block px-3.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 font-mono text-xs font-bold text-brand-300 mt-1">
+                            <?php if (session()->getFlashdata('reset_channel') === 'whatsapp'): ?>
+                                <i class="fa-brands fa-whatsapp text-emerald-400 mr-1.5"></i>
+                            <?php else: ?>
+                                <i class="fa-regular fa-envelope text-brand-400 mr-1.5"></i>
+                            <?php endif; ?>
+                            <?= esc(session()->getFlashdata('reset_target')) ?>
+                        </div>
+                    </div>
+
+                    <!-- Notice Box -->
+                    <div class="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-left space-y-2.5 text-xs">
+                        <div class="flex items-center gap-2 text-amber-400 font-bold text-[11px]">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>Masa Berlaku Terbatas: 15 Menit</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">
+                            Segera buka pesan Anda dan klik tautan resmi di dalamnya untuk membuat kata sandi baru sebelum kedaluwarsa.
+                        </p>
+                        <div class="pt-2 border-t border-slate-800 text-[10px] text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-brand-400"></i>
+                            <span>Token kriptografi acak (CSPRNG 256-bit) sekali pakai.</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="space-y-2.5 pt-2">
+                        <a href="<?= site_url('reset-password') ?>" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-brand-500/25 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-key"></i>
+                            <span>Punya Kode / Buka Halaman Input Token</span>
+                        </a>
+
+                        <a href="<?= site_url('forgot-password') ?>" class="w-full py-2.5 bg-slate-800/60 hover:bg-slate-800 text-slate-300 font-semibold text-xs rounded-xl border border-slate-700/60 transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-rotate-right text-[11px]"></i>
+                            <span>Kirim Ulang / Gunakan Metode Lain</span>
+                        </a>
+                    </div>
+                </div>
+
+            <?php else: ?>
+                <!-- FORM PERMINTAAN TOKEN RESET -->
+                <div class="text-center space-y-2 mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white flex items-center justify-center text-xl font-black mx-auto shadow-lg shadow-brand-500/25">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight">Lupa Kata Sandi</h1>
+                    <p class="text-xs text-slate-400">Pola reset aman menggunakan token acak sementara (CSPRNG) dengan masa berlaku 15 menit</p>
+                </div>
+
+                <!-- Flash Alerts -->
+                <?php if (session()->getFlashdata('success')): ?>
+                    <div class="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-check text-sm"></i>
+                        <span><?= session()->getFlashdata('success') ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (session()->getFlashdata('error') || session()->getFlashdata('errors')): ?>
+                    <div class="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs space-y-1">
+                        <div class="flex items-center gap-2 font-bold">
+                            <i class="fa-solid fa-circle-xmark text-sm"></i>
+                            <span><?= session()->getFlashdata('error') ?></span>
+                        </div>
+                        <?php if (is_array(session()->getFlashdata('errors'))): ?>
+                            <ul class="list-disc pl-5 text-[11px]">
+                                <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                                    <li><?= esc($err) ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
+                <form action="<?= site_url('forgot-password') ?>" method="post" class="space-y-4">
+                    <?= csrf_field() ?>
+
+                    <!-- Pilihan Metode Pengiriman Token (WhatsApp vs Email) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-2">Metode Pengiriman Token <span class="text-rose-400">*</span></label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <!-- WhatsApp Option -->
+                            <label class="relative flex flex-col p-3 rounded-2xl border cursor-pointer transition select-none has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 border-slate-700 bg-slate-900/60 hover:bg-slate-800/80">
+                                <input type="radio" name="channel" value="whatsapp" checked onchange="toggleChannel(this.value)" class="sr-only">
+                                <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs mb-1">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                                    <span>WhatsApp</span>
+                                </div>
+                                <span class="text-[10px] text-slate-400">Instan & Langsung ke HP</span>
+                            </label>
+
+                            <!-- Email Option -->
+                            <label class="relative flex flex-col p-3 rounded-2xl border cursor-pointer transition select-none has-[:checked]:border-brand-500 has-[:checked]:bg-brand-500/10 border-slate-700 bg-slate-900/60 hover:bg-slate-800/80">
+                                <input type="radio" name="channel" value="email" onchange="toggleChannel(this.value)" class="sr-only">
+                                <div class="flex items-center gap-2 text-brand-400 font-bold text-xs mb-1">
+                                    <i class="fa-regular fa-envelope text-sm"></i>
+                                    <span>Email Resmi</span>
+                                </div>
+                                <span class="text-[10px] text-slate-400">Kirim ke Inbox Akun</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Email Pengurus -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Pengurus Terdaftar <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="email" name="email" required value="<?= old('email') ?>" placeholder="contoh: rendy@himatika.org" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-xs sm:text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        </div>
+                    </div>
+
+                    <!-- NIM Pengurus -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Nomor Induk Mahasiswa (NIM) <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <i class="fa-regular fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="text" name="nim" required value="<?= old('nim') ?>" placeholder="contoh: 240401010288" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-xs sm:text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">Verifikasi ganda untuk memastikan kepemilikan akun sah.</p>
+                    </div>
+
+                    <!-- Nomor WhatsApp Tujuan (Hanya muncul jika WhatsApp dipilih) -->
+                    <div id="waTargetContainer">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Nomor WhatsApp Pengurus <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <i class="fa-brands fa-whatsapp absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400 text-sm"></i>
+                            <input type="text" name="whatsapp_number" id="whatsapp_number" value="<?= old('whatsapp_number', $defaultWaTarget ?? '') ?>" placeholder="contoh: 081234567890" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-xs sm:text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 placeholder:text-slate-500">
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">Tautan reset & kode acak akan dikirimkan ke nomor ini via gateway resmi.</p>
+                    </div>
+
+                    <!-- Security Specifications Banner -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
+                        <div class="font-bold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-lock text-brand-400"></i>
+                            <span>Protokol Keamanan Reset Kata Sandi:</span>
+                        </div>
+                        <ul class="space-y-1 text-[10px] text-slate-400 pl-4 list-disc">
+                            <li><strong>CSPRNG 256-bit:</strong> Token acak tidak dapat ditebak (*brute-force proof*).</li>
+                            <li><strong>Masa Berlaku 15 Menit:</strong> Token otomatis kedaluwarsa setelah batas waktu.</li>
+                            <li><strong>Single-Use Only:</strong> Langsung hangus seketika setelah digunakan.</li>
                         </ul>
-                    <?php endif; ?>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-brand-500/25 transition mt-3 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span>Kirim Tautan & Kode Reset</span>
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-5 border-t border-slate-800 flex items-center justify-between text-xs">
+                    <a href="<?= site_url('login') ?>" class="font-bold text-slate-400 hover:text-white transition inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                        <span>Kembali ke Login</span>
+                    </a>
+
+                    <a href="<?= site_url('reset-password') ?>" class="text-brand-400 hover:text-brand-300 font-semibold text-[11px] inline-flex items-center gap-1">
+                        <span>Punya Token? Masukkan di Sini</span>
+                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                    </a>
                 </div>
+
             <?php endif; ?>
-
-            <!-- Form -->
-            <form action="<?= site_url('forgot-password') ?>" method="post" class="space-y-4">
-                <?= csrf_field() ?>
-
-                <!-- Email -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Pengurus Terdaftar <span class="text-rose-400">*</span></label>
-                    <div class="relative">
-                        <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="email" name="email" required value="<?= old('email') ?>" placeholder="contoh: rendy@himatika.org" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
-                    </div>
-                </div>
-
-                <!-- NIM -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Nomor Induk Mahasiswa (NIM) <span class="text-rose-400">*</span></label>
-                    <div class="relative">
-                        <i class="fa-regular fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" name="nim" required value="<?= old('nim') ?>" placeholder="contoh: 240401010288" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
-                    </div>
-                    <p class="text-[10px] text-slate-500 mt-1">NIM digunakan sebagai verifikasi identitas resmi pengurus.</p>
-                </div>
-
-                <!-- Kata Sandi Baru -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Kata Sandi Baru <span class="text-rose-400">*</span></label>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="password" name="new_password" id="new_password" required minlength="6" placeholder="Minimal 6 karakter" class="w-full pl-10 pr-10 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
-                        <button type="button" onclick="togglePass('new_password', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200">
-                            <i class="fa-regular fa-eye text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Konfirmasi Kata Sandi Baru -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Ulangi Kata Sandi Baru <span class="text-rose-400">*</span></label>
-                    <div class="relative">
-                        <i class="fa-solid fa-shield-halved absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="password" name="confirm_password" id="confirm_password" required minlength="6" placeholder="Ketik ulang kata sandi baru" class="w-full pl-10 pr-10 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
-                        <button type="button" onclick="togglePass('confirm_password', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200">
-                            <i class="fa-regular fa-eye text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-brand-500/25 transition mt-3 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span>Simpan & Perbarui Kata Sandi</span>
-                </button>
-            </form>
-
-            <div class="mt-6 pt-5 border-t border-slate-800 text-center">
-                <a href="<?= site_url('login') ?>" class="text-xs font-bold text-slate-400 hover:text-white transition inline-flex items-center gap-1.5">
-                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
-                    <span>Kembali ke Halaman Login</span>
-                </a>
-            </div>
 
         </div>
 
@@ -136,17 +219,15 @@
     </div>
 
     <script>
-        function togglePass(fieldId, btn) {
-            const input = document.getElementById(fieldId);
-            const icon = btn.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+        function toggleChannel(channel) {
+            const waContainer = document.getElementById('waTargetContainer');
+            const waInput = document.getElementById('whatsapp_number');
+            if (channel === 'whatsapp') {
+                waContainer.classList.remove('hidden');
+                waInput.required = true;
             } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                waContainer.classList.add('hidden');
+                waInput.required = false;
             }
         }
     </script>
