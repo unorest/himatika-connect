@@ -108,7 +108,10 @@
                     </div>
                     <div class="relative">
                         <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="password" name="password" id="password" required placeholder="••••••••" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        <input type="password" name="password" id="password" required placeholder="••••••••" class="w-full pl-10 pr-11 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        <button type="button" onclick="toggleLoginPassword(this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition" aria-label="Tampilkan atau sembunyikan kata sandi">
+                            <i class="fa-regular fa-eye text-xs"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -116,29 +119,6 @@
                     Masuk ke Dashboard
                 </button>
             </form>
-
-            <?php if (defined('ENVIRONMENT') && ENVIRONMENT === 'development'): ?>
-                <!-- Quick Demo Accounts Cheatsheet (Hanya tampil di mode development) -->
-                <div class="mt-8 pt-6 border-t border-slate-700/60">
-                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-3 text-center">
-                        Demo Akun Uji Coba (Development Only)
-                    </span>
-                    <div class="grid grid-cols-3 gap-2 text-xs">
-                        <button type="button" onclick="fillCredential('rabiah@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-brand-500 text-left transition group">
-                            <div class="text-[10px] font-bold uppercase text-brand-400">Ketua (Admin)</div>
-                            <div class="font-semibold text-slate-300 truncate mt-0.5">rabiah@</div>
-                        </button>
-                        <button type="button" onclick="fillCredential('dimas@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-emerald-500 text-left transition group">
-                            <div class="text-[10px] font-bold uppercase text-emerald-400">Kadiv</div>
-                            <div class="font-semibold text-slate-300 truncate mt-0.5">dimas@</div>
-                        </button>
-                        <button type="button" onclick="fillCredential('vina@himatika.org')" class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700 hover:border-purple-500 text-left transition group">
-                            <div class="text-[10px] font-bold uppercase text-purple-400">Anggota</div>
-                            <div class="font-semibold text-slate-300 truncate mt-0.5">vina@</div>
-                        </button>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
 
         <p class="text-xs text-slate-500 text-center">
@@ -146,13 +126,20 @@
         </p>
     </div>
 
-    <?php if (defined('ENVIRONMENT') && ENVIRONMENT === 'development'): ?>
-        <script>
-            function fillCredential(email) {
-                document.getElementById('login_id').value = email;
-                document.getElementById('password').value = 'password123';
+    <script>
+        function toggleLoginPassword(btn) {
+            const input = document.getElementById('password');
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
-        </script>
-    <?php endif; ?>
+        }
+    </script>
 </body>
 </html>

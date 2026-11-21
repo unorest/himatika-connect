@@ -64,6 +64,14 @@ $routes->group('dashboard', ['filter' => 'auth'], function ($routes) {
         $routes->post('delete/(:num)', 'ScheduleController::delete/$1');
     });
 
+    // Kelola Event & Workshop Publik (Kalender Beranda & E-Sertifikat)
+    $routes->group('events', function ($routes) {
+        $routes->get('/', 'EventManageController::index');
+        $routes->post('store', 'EventManageController::store');
+        $routes->post('update/(:num)', 'EventManageController::update/$1');
+        $routes->post('delete/(:num)', 'EventManageController::delete/$1');
+    });
+
     // Moderasi Aspirasi & Q&A Publik
     $routes->group('moderasi-qa', function ($routes) {
         $routes->get('/', 'ModerasiQAController::index');

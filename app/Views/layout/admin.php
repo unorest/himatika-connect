@@ -111,6 +111,11 @@ $tanggalIndo = $hariIndo[(int) date('w')] . ', ' . date('d') . ' ' . $bulanIndo[
                     <span>Kelola Berita & Artikel</span>
                 </a>
 
+                <a href="<?= site_url('dashboard/events') ?>" class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition <?= str_contains(uri_string(), 'dashboard/events') ? 'bg-brand-600 text-white shadow-md font-bold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' ?>">
+                    <i class="fa-solid fa-calendar-days w-4 text-center"></i>
+                    <span>Kelola Event Publik</span>
+                </a>
+
                 <a href="<?= site_url('dashboard/moderasi-qa') ?>" class="flex items-center justify-between px-3 py-2.5 rounded-xl transition <?= str_contains(uri_string(), 'dashboard/moderasi-qa') ? 'bg-brand-600 text-white shadow-md font-bold' : 'text-slate-400 hover:bg-slate-800 hover:text-white' ?>">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-comments w-4 text-center"></i>
