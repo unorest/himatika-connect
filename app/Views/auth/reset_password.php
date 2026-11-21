@@ -41,18 +41,27 @@
                         <i class="fa-solid fa-key"></i>
                     </div>
                     <h1 class="text-2xl font-extrabold text-white tracking-tight">Verifikasi Token Reset</h1>
-                    <p class="text-xs text-slate-400">Masukkan kode verifikasi 6-digit atau token reset yang Anda terima via WhatsApp / Email</p>
+                    <p class="text-xs text-slate-400">Masukkan email akun dan kode verifikasi 6-digit (atau token tautan) yang Anda terima via WhatsApp / Email</p>
                 </div>
 
                 <!-- Flash Alerts -->
                 <?php if (session()->getFlashdata('error')): ?>
                     <div class="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2.5">
                         <i class="fa-solid fa-circle-xmark text-sm"></i>
-                        <span><?= session()->getFlashdata('error') ?></span>
+                        <span><?= esc(session()->getFlashdata('error')) ?></span>
                     </div>
                 <?php endif; ?>
 
                 <form action="<?= site_url('reset-password') ?>" method="get" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Pengurus Terdaftar <span class="text-rose-400">*</span></label>
+                        <div class="relative">
+                            <i class="fa-regular fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                            <input type="email" name="email" required value="<?= esc($email ?? '') ?>" placeholder="contoh: rendy@himatika.org" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white text-xs sm:text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-slate-500">
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-1">Wajib diisi saat memverifikasi menggunakan kode 6-digit.</p>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-bold text-slate-300 mb-1.5">Kode 6-Digit atau Token Reset <span class="text-rose-400">*</span></label>
                         <div class="relative">
@@ -146,7 +155,7 @@
                     <div class="mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs space-y-1">
                         <div class="flex items-center gap-2 font-bold">
                             <i class="fa-solid fa-circle-xmark text-sm"></i>
-                            <span><?= session()->getFlashdata('error') ?></span>
+                            <span><?= esc(session()->getFlashdata('error')) ?></span>
                         </div>
                         <?php if (is_array(session()->getFlashdata('errors'))): ?>
                             <ul class="list-disc pl-5 text-[11px]">
@@ -158,9 +167,10 @@
                     </div>
                 <?php endif; ?>
 
-                <form action="<?= site_url('reset-password/' . rawurlencode($token)) ?>" method="post" class="space-y-4">
+                <form action="<?= site_url('reset-password') ?>" method="post" class="space-y-4">
                     <?= csrf_field() ?>
                     <input type="hidden" name="token" value="<?= esc($token) ?>">
+                    <input type="hidden" name="email" value="<?= esc($email ?? ($record['email'] ?? '')) ?>">
 
                     <!-- Kata Sandi Baru -->
                     <div>

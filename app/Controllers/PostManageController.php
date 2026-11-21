@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\PostModel;
 use App\Models\CategoryModel;
+use App\Libraries\HtmlSanitizer;
 
 class PostManageController extends BaseController
 {
@@ -14,6 +15,63 @@ class PostManageController extends BaseController
     {
         $this->postModel     = new PostModel();
         $this->categoryModel = new CategoryModel();
+    }
+
+    /**
+     * Admin & Kadiv boleh mengelola semua berita; Staff hanya berita miliknya sendiri.
+     */
+    private function canManagePost(array $post): bool
+    {
+        $role   = session()->get('user_role');
+        $userId = (int) session()->get('user_id');
+
+        if (in_array($role, ['admin', 'kadiv'], true)) {
+            return true;
+        }
+
+        return (int) ($post['author_id'] ?? 0) === $userId;
+    }
+
+    /**
+     * Aturan validasi berita dengan pesan bahasa Indonesia yang jelas.
+     */
+    private function postValidationRules(): array
+    {
+        return [
+            'title' => [
+                'label'  => 'Judul Berita',
+                'rules'  => 'required|min_length[5]|max_length[255]',
+                'errors' => [
+                    'required'   => 'Judul berita wajib diisi.',
+                    'min_length' => 'Judul berita minimal 5 karakter.',
+                    'max_length' => 'Judul berita maksimal 255 karakter.',
+                ],
+            ],
+            'body' => [
+                'label'  => 'Isi Berita',
+                'rules'  => 'required|min_length[20]',
+                'errors' => [
+                    'required'   => 'Isi konten berita wajib diisi.',
+                    'min_length' => 'Isi konten berita minimal 20 karakter.',
+                ],
+            ],
+            'category_id' => [
+                'label'  => 'Kategori Berita',
+                'rules'  => 'required|is_natural_no_zero',
+                'errors' => [
+                    'required'           => 'Kategori berita wajib dipilih.',
+                    'is_natural_no_zero' => 'Kategori berita tidak valid.',
+                ],
+            ],
+            'status' => [
+                'label'  => 'Status Publikasi',
+                'rules'  => 'required|in_list[draft,published,archived]',
+                'errors' => [
+                    'required' => 'Status publikasi wajib dipilih.',
+                    'in_list'  => 'Status publikasi tidak valid.',
+                ],
+            ],
+        ];
     }
 
     public function index()
@@ -73,18 +131,13 @@ class PostManageController extends BaseController
 
     public function store()
     {
-        $rules = [
-            'title'       => 'required|min_length[5]|max_length[255]',
-            'body'        => 'required|min_length[20]',
-            'category_id' => 'required|is_natural_no_zero',
-            'status'      => 'required|in_list[draft,published,archived]',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        if (!$this->validate($this->postValidationRules())) {
+            return redirect()->to(site_url('dashboard/posts/create'))
+                             ->withInput()
+                             ->with('errors', $this->validator->getErrors());
         }
 
-        $title = trim($this->request->getPost('title'));
+        $title = trim((string) $this->request->getPost('title'));
         $slug  = url_title($title, '-', true);
 
         // Pastikan slug unik
@@ -96,17 +149,17 @@ class PostManageController extends BaseController
         $status = $this->request->getPost('status');
         $now    = date('Y-m-d H:i:s');
 
-        // Estimasi read time otomatis jika tidak diisi (rata-rata 200 kata per menit)
-        $body = $this->request->getPost('body');
-        $wordCount = str_word_count(strip_tags($body));
+        // Sanitasi HTML badan berita untuk mencegah Stored XSS
+        $body             = HtmlSanitizer::clean((string) $this->request->getPost('body'));
+        $wordCount        = str_word_count(strip_tags($body));
         $estimatedMinutes = max(1, (int) ceil($wordCount / 200));
 
         $data = [
             'title'        => $title,
             'slug'         => $slug,
             'body'         => $body,
-            'excerpt'      => trim($this->request->getPost('excerpt') ?? ''),
-            'thumbnail'    => trim($this->request->getPost('thumbnail') ?? ''),
+            'excerpt'      => trim((string) ($this->request->getPost('excerpt') ?? '')),
+            'thumbnail'    => trim((string) ($this->request->getPost('thumbnail') ?? '')),
             'author_id'    => session()->get('user_id'),
             'category_id'  => (int) $this->request->getPost('category_id'),
             'status'       => $status,
@@ -121,11 +174,15 @@ class PostManageController extends BaseController
 
     public function edit($id)
     {
-        $id = (int) $id;
+        $id   = (int) $id;
         $post = $this->postModel->find($id);
 
         if (!$post) {
             return redirect()->to(site_url('dashboard/posts'))->with('error', 'Berita tidak ditemukan.');
+        }
+
+        if (!$this->canManagePost($post)) {
+            return redirect()->to(site_url('dashboard/posts'))->with('error', 'Akses ditolak. Anda hanya dapat mengubah berita milik Anda sendiri.');
         }
 
         $categories = $this->categoryModel->getByType('blog');
@@ -142,35 +199,34 @@ class PostManageController extends BaseController
 
     public function update($id)
     {
-        $id = (int) $id;
+        $id   = (int) $id;
         $post = $this->postModel->find($id);
 
         if (!$post) {
             return redirect()->to(site_url('dashboard/posts'))->with('error', 'Berita tidak ditemukan.');
         }
 
-        $rules = [
-            'title'       => 'required|min_length[5]|max_length[255]',
-            'body'        => 'required|min_length[20]',
-            'category_id' => 'required|is_natural_no_zero',
-            'status'      => 'required|in_list[draft,published,archived]',
-        ];
-
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        if (!$this->canManagePost($post)) {
+            return redirect()->to(site_url('dashboard/posts'))->with('error', 'Akses ditolak. Anda hanya dapat mengubah berita milik Anda sendiri.');
         }
 
-        $status = $this->request->getPost('status');
+        if (!$this->validate($this->postValidationRules())) {
+            return redirect()->to(site_url('dashboard/posts/edit/' . $id))
+                             ->withInput()
+                             ->with('errors', $this->validator->getErrors());
+        }
+
+        $status      = $this->request->getPost('status');
         $publishedAt = $post['published_at'];
         if ($status === 'published' && empty($publishedAt)) {
             $publishedAt = date('Y-m-d H:i:s');
         }
 
         $data = [
-            'title'        => trim($this->request->getPost('title')),
-            'body'         => $this->request->getPost('body'),
-            'excerpt'      => trim($this->request->getPost('excerpt') ?? ''),
-            'thumbnail'    => trim($this->request->getPost('thumbnail') ?? ''),
+            'title'        => trim((string) $this->request->getPost('title')),
+            'body'         => HtmlSanitizer::clean((string) $this->request->getPost('body')),
+            'excerpt'      => trim((string) ($this->request->getPost('excerpt') ?? '')),
+            'thumbnail'    => trim((string) ($this->request->getPost('thumbnail') ?? '')),
             'category_id'  => (int) $this->request->getPost('category_id'),
             'status'       => $status,
             'read_time'    => (int) $this->request->getPost('read_time'),
@@ -184,7 +240,17 @@ class PostManageController extends BaseController
 
     public function delete($id)
     {
-        $id = (int) $id;
+        $id   = (int) $id;
+        $post = $this->postModel->find($id);
+
+        if (!$post) {
+            return redirect()->to(site_url('dashboard/posts'))->with('error', 'Berita tidak ditemukan.');
+        }
+
+        if (!$this->canManagePost($post)) {
+            return redirect()->to(site_url('dashboard/posts'))->with('error', 'Akses ditolak. Anda hanya dapat menghapus berita milik Anda sendiri.');
+        }
+
         $this->postModel->delete($id);
 
         return redirect()->to(site_url('dashboard/posts'))->with('success', 'Berita berhasil dihapus.');

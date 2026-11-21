@@ -48,14 +48,16 @@ class App extends BaseConfig
 
         // Auto-detect dynamic baseURL for GitHub Codespaces / dynamic host
         if (isset($_SERVER['HTTP_HOST'])) {
-            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-                ? 'https'
-                : 'http';
+            $host    = explode(':', $_SERVER['HTTP_HOST'])[0];
+            $isLocal = in_array(strtolower($host), ['localhost', '127.0.0.1', '::1'], true);
+
+            $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (!$isLocal && isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
+            $scheme = $isHttps ? 'https' : 'http';
 
             $this->baseURL = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/';
 
-            $host = explode(':', $_SERVER['HTTP_HOST'])[0];
             if (! in_array($host, $this->allowedHostnames, true)) {
                 $this->allowedHostnames[] = $host;
             }
@@ -215,8 +217,7 @@ class App extends BaseConfig
      *
      * For a better understanding of CSP, see these documents:
      *
-     * @see http://www.html5rocks.com/en/tutorials/security/content-security-policy/
-     * @see http://www.w3.org/TR/CSP/
+     * @see https://codeigniter.com/user_guide/general/content-security-policy.html
      */
     public bool $CSPEnabled = false;
 }

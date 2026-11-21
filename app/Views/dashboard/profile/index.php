@@ -91,6 +91,16 @@
                         </div>
                         <div class="flex items-center justify-between text-slate-600">
                             <span class="text-slate-400 flex items-center gap-2">
+                                <i class="fa-brands fa-whatsapp w-4 text-center text-emerald-500"></i> WhatsApp
+                            </span>
+                            <?php if (!empty($user['phone'])): ?>
+                                <span class="font-mono font-semibold text-slate-700"><?= esc($user['phone']) ?></span>
+                            <?php else: ?>
+                                <span class="text-[11px] font-medium text-amber-600">Belum diatur</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="flex items-center justify-between text-slate-600">
+                            <span class="text-slate-400 flex items-center gap-2">
                                 <i class="fa-regular fa-id-badge w-4 text-center"></i> Status Akun
                             </span>
                             <span class="font-bold text-emerald-600 flex items-center gap-1.5">
@@ -117,6 +127,7 @@
                 <ul class="space-y-1.5 text-amber-800/90 text-[11px] list-disc list-inside">
                     <li>Gunakan minimal <strong>6 karakter</strong> atau lebih.</li>
                     <li>Kombinasikan huruf besar, huruf kecil, angka, dan simbol.</li>
+                    <li>Daftarkan nomor WhatsApp aktif Anda untuk pemulihan kata sandi yang aman.</li>
                     <li>Jangan membagikan kata sandi kepada orang lain demi integritas data himpunan.</li>
                 </ul>
             </div>
@@ -212,7 +223,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-800">Informasi Pribadi & Kontak</h2>
-                            <p class="text-xs text-slate-400">Perbarui nama tampilan dan alamat email koordinasi Anda.</p>
+                            <p class="text-xs text-slate-400">Perbarui nama tampilan, email, dan nomor WhatsApp resmi untuk reset kata sandi.</p>
                         </div>
                     </div>
                 </div>
@@ -238,6 +249,20 @@
                             <input type="email" id="email" name="email" required value="<?= esc(old('email', $user['email'])) ?>"
                                 class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition">
                         </div>
+                    </div>
+
+                    <!-- Nomor WhatsApp Resmi -->
+                    <div>
+                        <label for="phone" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Nomor WhatsApp Terdaftar <span class="text-slate-400 font-normal">(untuk verifikasi reset kata sandi)</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa-brands fa-whatsapp absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500 text-sm"></i>
+                            <input type="text" id="phone" name="phone" value="<?= esc(old('phone', $user['phone'] ?? '')) ?>"
+                                placeholder="contoh: 081234567890 atau 6281234567890"
+                                class="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition">
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-1">Tautan reset kata sandi via WhatsApp hanya akan dikirim ke nomor yang tersimpan di sini.</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">

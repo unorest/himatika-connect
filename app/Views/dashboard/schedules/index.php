@@ -157,8 +157,8 @@
                                     </button>
                                 </form>
 
-                                <!-- Hapus / Batalkan Jadwal -->
-                                <?php if (session()->get('user_role') === 'admin' || session()->get('user_id') == $sch['created_by']): ?>
+                                <!-- Hapus / Batalkan Jadwal (Admin, Kadiv, atau pembuat agenda) -->
+                                <?php if (in_array(session()->get('user_role'), ['admin', 'kadiv'], true) || (int) session()->get('user_id') === (int) $sch['created_by']): ?>
                                     <form action="<?= site_url('dashboard/schedules/delete/' . $sch['id']) ?>" method="post" onsubmit="return confirm('Hapus/batalkan jadwal agenda ini?')">
                                         <?= csrf_field() ?>
                                         <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 transition" title="Batalkan Agenda">

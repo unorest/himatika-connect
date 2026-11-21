@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\UserModel;
 use App\Models\DivisionModel;
+use App\Models\PasswordResetModel;
 
 class ProfileController extends BaseController
 {
@@ -22,6 +23,9 @@ class ProfileController extends BaseController
     public function index()
     {
         $userId = session()->get('user_id');
+
+        // Pastikan kolom phone tersedia di tabel hmt_users
+        (new PasswordResetModel())->ensureTableExists();
 
         $user = $this->userModel->select('hmt_users.*, hmt_divisions.name as division_name, hmt_divisions.color as division_color')
                                 ->join('hmt_divisions', 'hmt_divisions.id = hmt_users.division_id', 'left')
@@ -105,11 +109,12 @@ class ProfileController extends BaseController
     }
 
     /**
-     * Proses Perbarui Informasi Profil Dasar (Nama & Email)
+     * Proses Perbarui Informasi Profil Dasar (Nama, Email, & Nomor WhatsApp)
      */
     public function updateProfile()
     {
         $userId = session()->get('user_id');
+        (new PasswordResetModel())->ensureTableExists();
         $user   = $this->userModel->find($userId);
 
         if (!$user) {
@@ -133,18 +138,28 @@ class ProfileController extends BaseController
                     'is_unique'   => 'Email ini sudah digunakan oleh akun lain.',
                 ],
             ],
+            'phone' => [
+                'label'  => 'Nomor WhatsApp',
+                'rules'  => 'permit_empty|regex_match[/^[0-9+\-\s]{8,20}$/]',
+                'errors' => [
+                    'regex_match' => 'Format nomor WhatsApp tidak valid (gunakan 8–20 digit angka, contoh: 081234567890).',
+                ],
+            ],
         ];
 
         if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        $name  = trim($this->request->getPost('name'));
-        $email = strtolower(trim($this->request->getPost('email')));
+        $name       = trim((string) $this->request->getPost('name'));
+        $email      = strtolower(trim((string) $this->request->getPost('email')));
+        $rawPhone   = trim((string) $this->request->getPost('phone'));
+        $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
 
         $this->userModel->update($userId, [
             'name'       => $name,
             'email'      => $email,
+            'phone'      => !empty($cleanPhone) ? $cleanPhone : null,
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
@@ -154,6 +169,6 @@ class ProfileController extends BaseController
             'user_email' => $email,
         ]);
 
-        return redirect()->to(site_url('dashboard/profile'))->with('success', 'Informasi profil Anda berhasil diperbarui!');
+        return redirect()->to(site_url('dashboard/profile'))->with('success', 'Informasi profil & nomor WhatsApp Anda berhasil diperbarui!');
     }
 }

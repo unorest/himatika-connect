@@ -180,10 +180,10 @@ class WhatsAppService
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
                 CURLOPT_MAXREDIRS      => 5,
-                CURLOPT_TIMEOUT        => 12, // 12 detik timeout agar stabil di koneksi apapun
+                CURLOPT_TIMEOUT        => 12,
                 CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_SSL_VERIFYPEER => false, // Hindari kegagalan SSL CA bundle di environment lokal/Codespaces
-                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST  => 'POST',
                 CURLOPT_POSTFIELDS     => [
@@ -223,7 +223,6 @@ class WhatsAppService
             if (isset($decoded['status']) && $decoded['status'] === false) {
                 $reason = $decoded['reason'] ?? $decoded['detail'] ?? 'Gateway menolak pengiriman.';
 
-                // Penjelasan ramah jika terjadi kasus umum
                 if (stripos($reason, 'token invalid') !== false) {
                     $reason = 'Token Fonnte tidak valid. Periksa kembali token API dari akun Fonnte Anda.';
                 } elseif (stripos($reason, 'device') !== false || stripos($reason, 'disconnect') !== false) {
@@ -332,7 +331,7 @@ class WhatsAppService
              . "Jika Anda yang melakukan perubahan ini, Anda dapat mengabaikan pesan ini.\n\n"
              . "🚨 *PENTING:* Jika Anda *TIDAK MERASA* mengubah kata sandi, segera hubungi Administrator BPH HIMATIKA untuk mengamankan akun Anda.\n"
              . "━━━━━━━━━━━━━━━━━━━━━\n"
-             . "_Sistem Keamanan Akun HIMATIKA Hub_";
+             . "_Sistem Keamanan Akun Pengurus HIMATIKA Hub_";
 
         return self::sendMessage($target, $msg);
     }

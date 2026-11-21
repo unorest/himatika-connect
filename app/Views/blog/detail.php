@@ -62,9 +62,9 @@
         </div>
     <?php endif; ?>
 
-    <!-- Konten Artikel Utama -->
+    <!-- Konten Artikel Utama (Disanitasi untuk mencegah Stored XSS) -->
     <div class="text-slate-800 text-sm sm:text-base leading-relaxed space-y-4 prose max-w-none border-b border-slate-200 pb-12">
-        <?= $post['body'] ?>
+        <?= \App\Libraries\HtmlSanitizer::clean($post['body'] ?? '') ?>
     </div>
 
     <!-- Rekomendasi Berita Lainnya -->

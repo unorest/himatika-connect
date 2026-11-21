@@ -22,6 +22,21 @@ class ScheduleController extends BaseController
         $this->userModel     = new UserModel();
     }
 
+    /**
+     * Admin & Kadiv boleh menghapus semua agenda; Staff hanya agenda miliknya sendiri.
+     */
+    private function canManageSchedule(array $schedule): bool
+    {
+        $role   = session()->get('user_role');
+        $userId = (int) session()->get('user_id');
+
+        if (in_array($role, ['admin', 'kadiv'], true)) {
+            return true;
+        }
+
+        return (int) ($schedule['created_by'] ?? 0) === $userId;
+    }
+
     public function index()
     {
         $userId         = session()->get('user_id');
@@ -172,7 +187,17 @@ class ScheduleController extends BaseController
 
     public function delete($id)
     {
-        $id = (int) $id;
+        $id       = (int) $id;
+        $schedule = $this->scheduleModel->find($id);
+
+        if (!$schedule) {
+            return redirect()->to(site_url('dashboard/schedules'))->with('error', 'Jadwal agenda tidak ditemukan.');
+        }
+
+        if (!$this->canManageSchedule($schedule)) {
+            return redirect()->to(site_url('dashboard/schedules'))->with('error', 'Akses ditolak. Anda hanya dapat menghapus agenda milik Anda sendiri.');
+        }
+
         $this->scheduleModel->delete($id);
 
         return redirect()->to(site_url('dashboard/schedules'))->with('success', 'Jadwal agenda berhasil dibatalkan/dihapus.');

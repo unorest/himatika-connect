@@ -64,7 +64,12 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
                 <?php if (!empty($posts)): ?>
+                    <?php
+                    $currentUserRole = session()->get('user_role');
+                    $currentUserId   = (int) session()->get('user_id');
+                    ?>
                     <?php foreach ($posts as $p): ?>
+                        <?php $canManage = in_array($currentUserRole, ['admin', 'kadiv'], true) || (int) $p['author_id'] === $currentUserId; ?>
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-4 px-4 sm:px-6 font-bold text-slate-900 max-w-xs sm:max-w-md">
                                 <a href="<?= site_url('berita/' . $p['slug']) ?>" target="_blank" class="hover:text-brand-600 transition flex items-center gap-1.5">
@@ -105,17 +110,21 @@
                                 <?= $p['published_at'] ? date('d M Y', strtotime($p['published_at'])) : '-' ?>
                             </td>
                             <td class="py-4 px-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <a href="<?= site_url('dashboard/posts/edit/' . $p['id']) ?>" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Edit Berita">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </a>
-                                    <form action="<?= site_url('dashboard/posts/delete/' . $p['id']) ?>" method="post" onsubmit="return confirm('Hapus berita ini?')">
-                                        <?= csrf_field() ?>
-                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus Berita">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                <?php if ($canManage): ?>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="<?= site_url('dashboard/posts/edit/' . $p['id']) ?>" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Edit Berita">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <form action="<?= site_url('dashboard/posts/delete/' . $p['id']) ?>" method="post" onsubmit="return confirm('Hapus berita ini?')">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus Berita">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                <?php else: ?>
+                                    <span class="text-[10px] text-slate-400 italic">Hanya baca</span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endforeach; ?>
