@@ -2,6 +2,30 @@
 
 <?= $this->section('content') ?>
 
+<!-- Quill Rich Text Editor Assets -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<style>
+    .ql-toolbar.ql-snow {
+        border-color: #e2e8f0;
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        background: #f8fafc;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .ql-container.ql-snow {
+        border-color: #e2e8f0;
+        border-bottom-left-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.875rem;
+        min-height: 260px;
+    }
+    .ql-editor {
+        min-height: 260px;
+        line-height: 1.7;
+    }
+</style>
+
 <div class="max-w-4xl mx-auto space-y-6">
 
     <!-- Back Button -->
@@ -33,7 +57,7 @@
             </h1>
         </div>
 
-        <form action="<?= esc($action) ?>" method="post" class="space-y-5">
+        <form id="postEditorForm" action="<?= esc($action) ?>" method="post" class="space-y-5">
             <?= csrf_field() ?>
 
             <div>
@@ -79,9 +103,9 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1.5">Tautan Gambar Sampul (Thumbnail URL)</label>
                 <div class="relative">
                     <i class="fa-regular fa-image absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="url" name="thumbnail" value="<?= esc(old('thumbnail', $post['thumbnail'] ?? '')) ?>" placeholder="https://images.unsplash.com/... atau URL gambar Google Drive" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <input type="url" name="thumbnail" id="thumbnailInput" value="<?= esc(old('thumbnail', $post['thumbnail'] ?? '')) ?>" placeholder="https://images.unsplash.com/..." class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
                 </div>
-                <span class="text-[10px] text-slate-400 mt-1 block">Opsional. Jika dikosongkan, kartu berita akan menggunakan background gradient modern.</span>
+                <span class="text-[10px] text-slate-400 mt-1 block">Opsional (wajib http:// atau https://). Jika dikosongkan, kartu berita menggunakan background gradient modern.</span>
             </div>
 
             <div>
@@ -90,8 +114,17 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">Isi Konten Berita Lengkap <span class="text-rose-500">*</span> <span class="text-slate-400 font-normal">(minimal 20 karakter)</span></label>
-                <textarea name="body" rows="12" required minlength="20" placeholder="Tuliskan isi berita, rilis kegiatan, atau catatan liputan secara komprehensif (minimal 20 karakter). Anda dapat menggunakan format paragraf standar HTML (<p>, <strong>, <em>, <ul>, <li>) atau teks biasa..." class="w-full p-4 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-normal leading-relaxed"><?= esc(old('body', $post['body'] ?? '')) ?></textarea>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-xs font-bold text-slate-700">Isi Konten Berita Lengkap <span class="text-rose-500">*</span> <span class="text-slate-400 font-normal">(minimal 20 karakter)</span></label>
+                    <span id="charCountBadge" class="text-[10px] font-bold text-slate-400">0 karakter</span>
+                </div>
+
+                <!-- Visual Rich Text Editor -->
+                <div id="quillEditor"></div>
+
+                <!-- Hidden Textarea synced with Quill (fallback jika JS/CDN gagal) -->
+                <textarea name="body" id="bodyTextarea" rows="12" class="hidden w-full p-4 rounded-2xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 font-normal leading-relaxed"><?= esc(old('body', $post['body'] ?? '')) ?></textarea>
+                <p id="bodyClientError" class="hidden text-[11px] font-semibold text-rose-600 mt-1.5">Isi konten berita minimal 20 karakter.</p>
             </div>
 
             <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
@@ -107,5 +140,69 @@
     </div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+    (function () {
+        const textarea = document.getElementById('bodyTextarea');
+        const editorEl = document.getElementById('quillEditor');
+        const badge    = document.getElementById('charCountBadge');
+        const errText  = document.getElementById('bodyClientError');
+        const form     = document.getElementById('postEditorForm');
+
+        if (typeof Quill === 'undefined') {
+            editorEl.classList.add('hidden');
+            textarea.classList.remove('hidden');
+            textarea.required = true;
+            textarea.minLength = 20;
+            return;
+        }
+
+        const quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            placeholder: 'Tuliskan isi berita, rilis kegiatan, atau liputan acara secara lengkap...',
+            modules: {
+                toolbar: [
+                    [{ header: [2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
+                    ['blockquote', 'link'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // Muat konten awal (untuk mode Edit atau old() setelah error validasi)
+        const initialHtml = textarea.value;
+        if (initialHtml && initialHtml.trim() !== '') {
+            quill.clipboard.dangerouslyPasteHTML(initialHtml);
+        }
+
+        function updateCounter() {
+            const plainLen = quill.getText().trim().length;
+            badge.textContent = plainLen + ' karakter';
+            if (plainLen >= 20) {
+                badge.className = 'text-[10px] font-bold text-emerald-600';
+                errText.classList.add('hidden');
+            } else {
+                badge.className = 'text-[10px] font-bold text-amber-600';
+            }
+        }
+
+        quill.on('text-change', updateCounter);
+        updateCounter();
+
+        form.addEventListener('submit', function (e) {
+            const plainLen = quill.getText().trim().length;
+            if (plainLen < 20) {
+                e.preventDefault();
+                errText.classList.remove('hidden');
+                quill.focus();
+                return;
+            }
+            textarea.value = quill.root.innerHTML;
+        });
+    })();
+</script>
 
 <?= $this->endSection() ?>

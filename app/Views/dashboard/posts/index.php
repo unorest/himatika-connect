@@ -72,7 +72,7 @@
                         <?php $canManage = in_array($currentUserRole, ['admin', 'kadiv'], true) || (int) $p['author_id'] === $currentUserId; ?>
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="py-4 px-4 sm:px-6 font-bold text-slate-900 max-w-xs sm:max-w-md">
-                                <a href="<?= site_url('berita/' . $p['slug']) ?>" target="_blank" class="hover:text-brand-600 transition flex items-center gap-1.5">
+                                <a href="<?= site_url('berita/' . $p['slug']) ?>" target="_blank" rel="noopener noreferrer" class="hover:text-brand-600 transition flex items-center gap-1.5">
                                     <span class="truncate"><?= esc($p['title']) ?></span>
                                     <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400"></i>
                                 </a>
@@ -115,7 +115,7 @@
                                         <a href="<?= site_url('dashboard/posts/edit/' . $p['id']) ?>" class="p-1.5 text-slate-500 hover:text-brand-600 hover:bg-slate-100 rounded-lg transition" title="Edit Berita">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </a>
-                                        <form action="<?= site_url('dashboard/posts/delete/' . $p['id']) ?>" method="post" onsubmit="return confirm('Hapus berita ini?')">
+                                        <form action="<?= site_url('dashboard/posts/delete/' . $p['id']) ?>" method="post" onsubmit="return openConfirmModal(this, 'Yakin ingin menghapus berita ini? Tindakan ini tidak dapat dibatalkan.')">
                                             <?= csrf_field() ?>
                                             <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Hapus Berita">
                                                 <i class="fa-solid fa-trash-can"></i>

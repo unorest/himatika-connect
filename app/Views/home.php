@@ -103,23 +103,27 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <?php if (!empty($latestPosts)): ?>
                 <?php foreach ($latestPosts as $post): ?>
-                    <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition duration-300">
-                        <div class="h-48 bg-gradient-to-tr from-slate-800 to-brand-900 p-6 flex flex-col justify-between text-white relative">
-                            <span class="self-start text-[11px] font-bold px-3 py-1 rounded-full bg-white/20 backdrop-blur">
+                    <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
+                        <a href="<?= site_url('berita/' . $post['slug']) ?>" class="block h-48 bg-gradient-to-tr from-slate-800 to-brand-900 p-5 flex flex-col justify-between text-white relative overflow-hidden">
+                            <?php if (!empty($post['thumbnail'])): ?>
+                                <img src="<?= esc($post['thumbnail']) ?>" alt="<?= esc($post['title']) ?>" loading="lazy" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/30 to-slate-950/20"></div>
+                            <?php endif; ?>
+                            <span class="relative z-10 self-start text-[11px] font-bold px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/15">
                                 <?= esc($post['category_name'] ?? 'Umum') ?>
                             </span>
-                            <div class="text-xs text-slate-300 flex items-center gap-2">
+                            <div class="relative z-10 text-xs text-slate-200 flex items-center gap-2 font-medium">
                                 <i class="fa-regular fa-clock"></i>
                                 <?= esc($post['read_time'] ?? 3) ?> menit baca
                             </div>
-                        </div>
+                        </a>
                         <div class="p-6 flex-1 flex flex-col justify-between">
                             <div class="space-y-2">
-                                <h3 class="font-bold text-lg text-slate-900 line-clamp-2 hover:text-brand-600 transition">
+                                <h3 class="font-bold text-lg text-slate-900 line-clamp-2 group-hover:text-brand-600 transition">
                                     <a href="<?= site_url('berita/' . $post['slug']) ?>"><?= esc($post['title']) ?></a>
                                 </h3>
                                 <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed">
-                                    <?= esc($post['excerpt'] ?? strip_tags($post['body'])) ?>
+                                    <?= esc($post['excerpt'] ?: mb_substr(strip_tags($post['body']), 0, 140)) ?>
                                 </p>
                             </div>
                             <div class="pt-6 mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
@@ -145,7 +149,7 @@
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Agenda & Workshop Mendatang</h2>
             </div>
             <p class="text-sm text-slate-400 max-w-md mt-2 md:mt-0">
-                Terbuka untuk seluruh mahasiswa. Daftarkan dirimu segera sebelum kuota habis.
+                Terbuka untuk seluruh mahasiswa. Lihat detail kegiatan atau klaim E-Sertifikat resmi setelah berpartisipasi.
             </p>
         </div>
 
@@ -175,7 +179,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-8 pt-6 border-t border-slate-700 flex items-center justify-between">
+                        <div class="mt-8 pt-6 border-t border-slate-700 flex items-center justify-between gap-3">
                             <div class="text-xs text-slate-400">
                                 <?php if ($ev['max_participants']): ?>
                                     Kuota: <strong class="text-white"><?= esc($ev['max_participants']) ?> Peserta</strong>
@@ -183,11 +187,25 @@
                                     <strong class="text-emerald-400">Terbuka Umum</strong>
                                 <?php endif; ?>
                             </div>
-                            <?php if ($ev['allow_registration']): ?>
-                                <button class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-md transition">
-                                    Daftar Sekarang
+                            <div class="flex items-center gap-2">
+                                <button type="button"
+                                    onclick='openEventModal(<?= json_encode([
+                                        "id"          => $ev["id"],
+                                        "title"       => $ev["title"],
+                                        "category"    => $ev["category_name"] ?? "Event",
+                                        "description" => $ev["description"] ?? "",
+                                        "location"    => $ev["location"] ?? "Kampus / Online",
+                                        "start"       => date("d M Y, H:i", strtotime($ev["start_datetime"])) . " WIB",
+                                        "end"         => !empty($ev["end_datetime"]) ? date("d M Y, H:i", strtotime($ev["end_datetime"])) . " WIB" : "-",
+                                        "quota"       => $ev["max_participants"] ? $ev["max_participants"] . " Peserta" : "Terbuka Umum",
+                                        "certUrl"     => site_url("sertifikat?event_id=" . $ev["id"]),
+                                        "forumUrl"    => site_url("forum#tanya"),
+                                    ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>)'
+                                    class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 hover:bg-brand-500 text-white shadow-md transition inline-flex items-center gap-1.5">
+                                    <span>Info & Akses Event</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </button>
-                            <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -197,6 +215,52 @@
         </div>
     </div>
 </section>
+
+<!-- Modal Detail Event -->
+<div id="eventDetailModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 text-slate-800">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <span id="evModalCategory" class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-extrabold uppercase tracking-wider">Event</span>
+                <h3 id="evModalTitle" class="text-lg font-extrabold text-slate-900 mt-2 leading-snug"></h3>
+            </div>
+            <button type="button" onclick="closeEventModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center flex-shrink-0 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p id="evModalDesc" class="text-xs text-slate-600 leading-relaxed"></p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs">
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Waktu Mulai</span>
+                <span id="evModalStart" class="font-bold text-slate-800 mt-0.5 block"></span>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Lokasi</span>
+                <span id="evModalLocation" class="font-bold text-slate-800 mt-0.5 block"></span>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Kuota</span>
+                <span id="evModalQuota" class="font-bold text-emerald-700 mt-0.5 block"></span>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Waktu Selesai</span>
+                <span id="evModalEnd" class="font-bold text-slate-800 mt-0.5 block"></span>
+            </div>
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2.5">
+            <a id="evModalForumLink" href="#" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition text-center">
+                Tanya Panitia
+            </a>
+            <a id="evModalCertLink" href="#" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 shadow-md transition inline-flex items-center justify-center gap-2">
+                <i class="fa-solid fa-award"></i>
+                <span>Portal Feedback & E-Sertifikat</span>
+            </a>
+        </div>
+    </div>
+</div>
 
 <!-- Forum Aspirasi & Q&A Preview -->
 <section class="py-20 bg-slate-50">
@@ -220,5 +284,23 @@
         </div>
     </div>
 </section>
+
+<script>
+    function openEventModal(ev) {
+        document.getElementById('evModalCategory').textContent = ev.category;
+        document.getElementById('evModalTitle').textContent = ev.title;
+        document.getElementById('evModalDesc').textContent = ev.description || 'Informasi lengkap kegiatan resmi HIMATIKA Connect.';
+        document.getElementById('evModalStart').textContent = ev.start;
+        document.getElementById('evModalEnd').textContent = ev.end;
+        document.getElementById('evModalLocation').textContent = ev.location;
+        document.getElementById('evModalQuota').textContent = ev.quota;
+        document.getElementById('evModalCertLink').href = ev.certUrl;
+        document.getElementById('evModalForumLink').href = ev.forumUrl;
+        document.getElementById('eventDetailModal').classList.remove('hidden');
+    }
+    function closeEventModal() {
+        document.getElementById('eventDetailModal').classList.add('hidden');
+    }
+</script>
 
 <?= $this->endSection() ?>
